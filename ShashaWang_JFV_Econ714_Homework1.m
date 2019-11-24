@@ -114,7 +114,7 @@ T = table(kSteadyState,labor_1_SteadyState,labor_2_SteadyState)
 kSpread = 0.3;
 kMax = kSteadyState * (1 + kSpread);
 kMin = kSteadyState * (1 - kSpread);
-Nk = 50;
+Nk = 250;
 vGrid_k = linspace(kMin,kMax,Nk)';
 inputs.vGrid_k = vGrid_k;
 
@@ -126,8 +126,65 @@ inputs.vGrid_k = vGrid_k;
 % And we need to write consumption functions consumptionFunction1.m,
 % consumptionFunction2.m
 
-% consumptionFunction1 = @(a_1,k,kPrime,labor_1,aalphaK,aalphaL,ddelta)a_1 * k^aalphaK * labor_1^aalphaL + (1-ddelta) * k - kPrime;
-% consumptionFunction2 = @(a_2,labor_2)a_2 * labor_2;
+%% Efficiency Matrices to save time
+% Because fsolve takes a long time in iteration to solve for labor_1,
+% labor_2, I create the matrices for them as well as for consumption_1 and
+% consumption_2 to retrieve from later.
+
+% Note we have to make kPrime on the first dimension in order not to cause
+% any problem of dimensionality during interpolation
+
+mLabor_1Fsolve = zeros(Nk,Na,Nk); % kPrime,[a_1,a_2],k
+mLabor_2Fsolve = zeros(Nk,Na,Nk);
+mConsumption_1Fsolve = zeros(Nk,Na,Nk);
+mConsumption_2Fsolve = zeros(Nk,Na,Nk);
+mCurrentUtilityFsolve = zeros(Nk,Na,Nk);
+% mMarginalUtilityTodayFsolve = zeros(Nk,Na,Nk);
+% mMarginalUtilityTomorrowFsolve = ;
+laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
+opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
+
+tic
+for ia = 1:Na
+    a_1 = mGrid_a1a2(ia,1);
+    a_2 = mGrid_a1a2(ia,2);
+    for ik = 1:Nk
+        
+        k = vGrid_k(ik);
+        
+        for ikPrime = 1:Nk
+            kPrime = vGrid_k(ikPrime);
+            
+            vLaborFsolve = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+
+            mLabor_1Fsolve(ikPrime,ia,ik) = vLaborFsolve(1);
+            mLabor_2Fsolve(ikPrime,ia,ik) = vLaborFsolve(2);
+            mConsumption_1Fsolve(ikPrime,ia,ik) = consumptionFunction1(a_1,k,kPrime,vLaborFsolve(1),aalphaK,aalphaL,ddelta);
+            mConsumption_2Fsolve(ikPrime,ia,ik) = consumptionFunction2(a_2,vLaborFsolve(2));
+            mCurrentUtilityFsolve(ikPrime,ia,ik) = utilityFunction(mConsumption_1Fsolve(ikPrime,ia,ik),mConsumption_2Fsolve(ikPrime,ia,ik),vLaborFsolve(1),vLaborFsolve(2),mmu_1,mmu_2);
+%             mMarginalUtilityTodayFsolve(ikPrime,ia,ik) = mmu_1 * (mConsumption_2Fsolve(ikPrime,ia,ik))^mmu_2 * (mConsumption_1Fsolve(ikPrime,ia,ik))^(mmu_1-1);
+            laborInitial=[vLaborFsolve(1),vLaborFsolve(2)];
+        end
+        
+    end
+end
+toc
+
+inputs.mLabor_1Fsolve = mLabor_1Fsolve;
+inputs.mLabor_2Fsolve = mLabor_2Fsolve;
+inputs.mConsumption_1Fsolve = mConsumption_1Fsolve;
+inputs.mConsumption_2Fsolve = mConsumption_2Fsolve;
+inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
+% inputs.mMarginalUtilityTodayFsolve = mMarginalUtilityTodayFsolve;
+% 
+% mLabor_1Fsolve=permute(mLabor_1Fsolve,[3,2,1]);
+% mLabor_2Fsolve=permute(mLabor_2Fsolve,[3,2,1]);
+% mConsumption_1Fsolve=permute(mConsumption_1Fsolve,[3,2,1]);
+% mConsumption_2Fsolve=permute(mConsumption_2Fsolve,[3,2,1]);
+% mCurrentUtilityFsolve=permute(mCurrentUtilityFsolve,[3,2,1]);
+
+save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve')
+% 历时 2516.447092 秒。
 
 %% Required matrices and vectors
 
@@ -155,13 +212,13 @@ mDifference(iteration) = 100;
 
 options = optimset('Display', 'off');
 opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
-laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
+% laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
 
 tic
 
 % Finding value and policy functions numerically
 while iteration <= maxIter && mDifference(iteration) > tolerance
-    expectedValue0 = mValue0 * mProb_a1a2';
+    expectedValue0 = mValue0 * mProb_a1a2'; % row: kPrime, column: a, i.e., expected value if today's shock is a and I choose k as tomorrow's capital stock
 %     inputs.expectedValue0 = expectedValue0;
 
     for ia = 1:Na
@@ -171,23 +228,34 @@ while iteration <= maxIter && mDifference(iteration) > tolerance
         
         for ik = 1:Nk
             k = vGrid_k(ik);
+            
+            if ik ==1
                         
-            [kPrime, vAux] = fminbnd(@(kPrime) ...
-                -valueFunction(kPrime,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-                max(0.8*vGrid_k(ik),vGrid_k(1)),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+                [kPrime, fval] = fminbnd(@(kPrime) ...
+                    -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                    vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);       
+            else
+                [kPrime, fval] = fminbnd(@(kPrime) ...
+                    -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                    mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+            end
+            
             mKPolicy(ik,ia) = kPrime;
-            mValue(ik,ia) = -vAux;            
+            mValue(ik,ia) = -fval;     
             
  %% If we can retrieve other outputs of the objective function of fminbnd, it would be much easier and FASTER to get the labor and consumption policy function
             if mDifference(iteration) < tolerance*10 % Store the policy functions in case it's the last iteration
-                vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-                mLaborPolicy_1(ik,ia) = vLabor(1);
-                mLaborPolicy_2(ik,ia) = vLabor(2);
-                mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
-                mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
-                laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
+%                 vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+%                 mLaborPolicy_1(ik,ia) = vLabor(1);
+%                 mLaborPolicy_2(ik,ia) = vLabor(2);
+%                 mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
+%                 mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
+%                 laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
 %                 inputs.laborInitial = laborInitial;
-
+                mLaborPolicy_1(ik,ia) = interp1(vGrid_k,mLabor_1Fsolve(:,ia,ik),kPrime);
+                mLaborPolicy_2(ik,ia) = interp1(vGrid_k,mLabor_2Fsolve(:,ia,ik),kPrime);
+                mConsumptionPolicy_1(ik,ia) = interp1(vGrid_k,mConsumption_1Fsolve(:,ia,ik),kPrime);
+                mConsumptionPolicy_2(ik,ia) = interp1(vGrid_k,mConsumption_2Fsolve(:,ia,ik),kPrime);
             end
         end
     end
@@ -206,75 +274,94 @@ while iteration <= maxIter && mDifference(iteration) > tolerance
 end
 
 toc
+%  Iteration:  1, Sup diff: 0.003807
+%  Iteration: 11, Sup diff: 0.000832
+%  Iteration: 21, Sup diff: 0.000485
+%  Iteration: 31, Sup diff: 0.000300
+%  Iteration: 41, Sup diff: 0.000191
+%  Iteration: 51, Sup diff: 0.000122
+%  Iteration: 61, Sup diff: 0.000079
+%  Iteration: 71, Sup diff: 0.000051
+%  Iteration: 81, Sup diff: 0.000033
+%  Iteration: 91, Sup diff: 0.000022
+%  Iteration: 101, Sup diff: 0.000014
+%  Iteration: 111, Sup diff: 0.000009
+%  Iteration: 121, Sup diff: 0.000006
+%  Iteration: 131, Sup diff: 0.000004
+%  Iteration: 141, Sup diff: 0.000003
+%  Iteration: 151, Sup diff: 0.000002
+%  Iteration: 161, Sup diff: 0.000001
+% toc
+% 历时 1590.565320 秒。
 
 %% figures for Value Function Iteration with a Fixed Grid
 
-figure(2);
+figure;
 [kk,aa]=meshgrid(vGrid_k, mGrid_a1a2(:,1));
 mesh(kk, aa, mValue');
 
-title('Value Under Different Shocks','interpreter','latex')
+title('Value - Fixed Grid','interpreter','latex')
 xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Value','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_value_3D')
+savefig('q3_value_fixed_grid')
 
-figure(3);
+figure;
 mesh(kk, aa, mKPolicy');
 
-title('Policy for Next Period Capital Under Different Shocks','interpreter','latex')
+title('Policy for Next Period Capital - Fixed Grid','interpreter','latex')
 xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Next Period Capital $k\prime$','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_kPolicy_3D')
+savefig('q3_kPolicy_fixed_grid')
 
-figure(4);
+figure;
 mesh(kk, aa, mLaborPolicy_1');
 
-title('Policy for Good 1 Labor Under Different Shock','interpreter','latex')
+title('Policy for Good 1 Labor - Fixed Grid','interpreter','latex')
 xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 1 Labor','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_laborPolicy_1_3D')
+savefig('q3_laborPolicy_1_fixed_grid')
 
-figure(5);
+figure;
 mesh(kk, aa, mLaborPolicy_2');
 
-title('Policy for Good 2 Labor Under Different Shock','interpreter','latex')
+title('Policy for Good 2 Labor - Fixed Grid','interpreter','latex')
 xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 2 Labor','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_laborPolicy_2_3D')
+savefig('q3_laborPolicy_2_fixed_grid')
 
-figure(6);
+figure;
 mesh(kk, aa, mConsumptionPolicy_1');
 
-title('Policy for Good 1 Consumption Under Different Shock','interpreter','latex')
+title('Policy for Good 1 Consumption - Fixed Grid','interpreter','latex')
 xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 1 Consumption','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_consumptionPolicy_1_3D')
+savefig('q3_consumptionPolicy_1_fixed_grid')
 
-figure(7);
+figure;
 mesh(kk, aa, mConsumptionPolicy_2');
 
-title('Policy for Good 2 Consumption Under Different Shocks','interpreter','latex')
+title('Policy for Good 2 Consumption - Fixed Grid','interpreter','latex')
 xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 2 Consumption','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_consumptionPolicy_2_3D')
+savefig('q3_consumptionPolicy_2_fixed_grid')
 
 % save ShashaWang_JFV_PS1_5_capital_grid_points
 
@@ -320,9 +407,9 @@ savefig('q3_consumptionPolicy_2_3D')
 %  Iteration: 141, Sup diff: 0.000003
 %  Iteration: 151, Sup diff: 0.000002
 %  Iteration: 161, Sup diff: 0.000001
-% 历时 6566.472522 秒。
+% time elapsed  6566.472522 s。
 
-save ShashaWang_JFV_PS1_50_capital_grid_points
+% save ShashaWang_JFV_PS1_50_capital_grid_points
 %  Iteration:  1, Sup diff: 0.003807
 %  Iteration: 11, Sup diff: 0.000832
 %  Iteration: 21, Sup diff: 0.000486
@@ -340,92 +427,461 @@ save ShashaWang_JFV_PS1_50_capital_grid_points
 %  Iteration: 141, Sup diff: 0.000003
 %  Iteration: 151, Sup diff: 0.000002
 %  Iteration: 161, Sup diff: 0.000001
-% 历时 25248.327232 秒。
+% time elapsed  25248.327232 s。
+
+% save ShashaWang_JFV_PS1_100_capital_grid_points_fixed_grid
+
+% toc
+%  Iteration:  1, Sup diff: 0.004372
+%  Iteration: 11, Sup diff: 0.002907
+%  Iteration: 21, Sup diff: 0.001932
+%  Iteration: 31, Sup diff: 0.001285
+%  Iteration: 41, Sup diff: 0.000854
+%  Iteration: 51, Sup diff: 0.000568
+%  Iteration: 61, Sup diff: 0.000378
+%  Iteration: 71, Sup diff: 0.000251
+%  Iteration: 81, Sup diff: 0.000167
+%  Iteration: 91, Sup diff: 0.000111
+%  Iteration: 101, Sup diff: 0.000074
+%  Iteration: 111, Sup diff: 0.000049
+%  Iteration: 121, Sup diff: 0.000033
+%  Iteration: 131, Sup diff: 0.000022
+%  Iteration: 141, Sup diff: 0.000014
+%  Iteration: 151, Sup diff: 0.000010
+%  Iteration: 161, Sup diff: 0.000006
+%  Iteration: 171, Sup diff: 0.000004
+%  Iteration: 181, Sup diff: 0.000003
+%  Iteration: 191, Sup diff: 0.000002
+%  Iteration: 201, Sup diff: 0.000001
+% time elapsed 2731.808359 s, i.e., 46min。
 
 %% For accuracy test, compute the euler equation error
 
-% First let's not use linear interpolation for tomorrow's values
+% % First let's not use linear interpolation for tomorrow's values
+% 
+% leftHandSideOfEulerEquation = zeros(Nk,Na); % Marginal utility of today
+% rightHandSideOfEulerEquation = zeros(Nk,Na); % expected Marginal utility of tomorrow
+% % laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
+% 
+% % Compute marginal utility of today
+% for ia = 1:Na
+%     a = mGrid_a1a2(ia,:);
+%     a_1 = mGrid_a1a2(ia,1);
+%     a_2 = mGrid_a1a2(ia,2);        
+%     
+%     for ik = 1:Nk
+% %         k = vGrid_k(ik);
+%         kPrime = mKPolicy(ik,ia);
+% %         kPrimePrime = depend on aPrime
+% %         vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+%         [v,ikPrime]=min(abs(kPrime - vGrid_k));
+%         
+%         consumption_1 = mConsumptionPolicy_1(ik,ia);
+%         consumption_2 = mConsumptionPolicy_2(ik,ia);
+% %         labor_1 = mLaborPolicy_1(ik,ia);
+% %         labor_2 = mLaborPolicy_2(ik,ia);
+% %         laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
+% %         leftHandSideOfEulerEquation(ik,ia) = mmu_1 * (a_2 * labor_2)^mmu_2 * ...
+% %             (a_1 * k^aalphaK * labor_1^aalphaL + (1-ddelta) * k - kPrime)^(mmu_1-1);
+%        
+%         marginalUtilityToday = mmu_1 * (consumption_2)^mmu_2 * (consumption_1)^(mmu_1-1);
+%         leftHandSideOfEulerEquation(ik,ia) = marginalUtilityToday;
+%         
+% % Compute expected marginal utility of tomorrow
+%         expected = zeros(Na,1);
+%         
+%         for iaPrime = 1:Na
+%             aPrime = mGrid_a1a2(iaPrime,:);
+%             aPrime_1 = mGrid_a1a2(iaPrime,1);
+%             aPrime_2 = mGrid_a1a2(iaPrime,2); 
+%             
+% %             kPrimePrime = mKPolicy(ikPrime,iaPrime);
+%             consumptionPrime_1 = mConsumptionPolicy_1(ikPrime,iaPrime);
+%             consumptionPrime_2 = mConsumptionPolicy_2(ikPrime,iaPrime);
+%             laborPrime_1 = mLaborPolicy_1(ikPrime,iaPrime);
+%             
+%             marginalUtilityTomorrow = mmu_1 * (consumptionPrime_2)^mmu_2 * (consumptionPrime_1)^(mmu_1-1);
+%             returnOnCapital = 1 - ddelta + aPrime_1 * laborPrime_1^aalphaL * aalphaK * (kPrime)^(aalphaK-1);
+%             
+%             unexpected = bbeta * marginalUtilityTomorrow * returnOnCapital;
+%             expected(iaPrime) = unexpected * mProb_a1a2(ia,iaPrime);
+%         end
+%         rightHandSideOfEulerEquation(ik,ia) = sum(expected);
+%     end
+% end
+% 
+% errorEulerEquationNoLinearInterpolation = abs(leftHandSideOfEulerEquation - rightHandSideOfEulerEquation);
+% errorEulerEquationNoLinearInterpolationDecimalLog = log10( errorEulerEquationNoLinearInterpolation );
+% 
+% figure(8);
+% mesh(kk, aa, errorEulerEquationNoLinearInterpolationDecimalLog');
+% 
+% title('Euler Equation Error $log_{10}$ No Linear Interpolation','interpreter','latex')
+% xlabel('Capital Stock $k$','interpreter','latex')
+% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+% zlabel('error','interpreter','latex')
+% xlim([min(vGrid_k),max(vGrid_k)])
+% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+% savefig('q3_eulerEquationErrorNoLinearInterpolation_3D')
 
-leftHandSideOfEulerEquation = zeros(Nk,Na); % Marginal utility of today
-rightHandSideOfEulerEquation = zeros(Nk,Na); % expected Marginal utility of tomorrow
+errorEulerEquationLinearInterpolationFixedGrid = eulerEquationErrorFunction(Nk,vGrid_k,mKPolicy,mLaborPolicy_1,mConsumptionPolicy_1,mConsumptionPolicy_2,Na,mGrid_a1a2,mProb_a1a2,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL);
+errorEulerEquationLinearInterpolationFixedGridDecimalLog = log10( errorEulerEquationLinearInterpolationFixedGrid );
+
+figure;
+mesh(kk, aa, errorEulerEquationLinearInterpolationFixedGridDecimalLog');
+
+title('Euler Equation Error $log_{10}$ Linear Interpolation - Fixed Grid','interpreter','latex')
+xlabel('Capital Stock $k$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
+zlabel('error','interpreter','latex')
+xlim([min(vGrid_k),max(vGrid_k)])
+ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+savefig('q3_eulerEquationErrorLinearInterpolation_fixed_grid')
+
+% save ShashaWang_JFV_PS1_60_capital_grid_points
+%  Iteration:  1, Sup diff: 0.003807
+%  Iteration: 11, Sup diff: 0.000832
+%  Iteration: 21, Sup diff: 0.000485
+%  Iteration: 31, Sup diff: 0.000300
+%  Iteration: 41, Sup diff: 0.000191
+%  Iteration: 51, Sup diff: 0.000122
+%  Iteration: 61, Sup diff: 0.000079
+%  Iteration: 71, Sup diff: 0.000051
+%  Iteration: 81, Sup diff: 0.000033
+%  Iteration: 91, Sup diff: 0.000022
+%  Iteration: 101, Sup diff: 0.000014
+%  Iteration: 111, Sup diff: 0.000009
+%  Iteration: 121, Sup diff: 0.000006
+%  Iteration: 131, Sup diff: 0.000004
+%  Iteration: 141, Sup diff: 0.000003
+%  Iteration: 151, Sup diff: 0.000002
+%  Iteration: 161, Sup diff: 0.000001
+% toc
+% 历时 1590.565320 秒。
+
+% After I take advantage of the monotonicity of the policy function wrt
+% capital, the minimazation takes a lot less time
+%  Iteration:  1, Sup diff: 0.006262
+%  Iteration: 11, Sup diff: 0.000826
+%  Iteration: 21, Sup diff: 0.000481
+%  Iteration: 31, Sup diff: 0.000298
+%  Iteration: 41, Sup diff: 0.000189
+%  Iteration: 51, Sup diff: 0.000121
+%  Iteration: 61, Sup diff: 0.000078
+%  Iteration: 71, Sup diff: 0.000051
+%  Iteration: 81, Sup diff: 0.000033
+%  Iteration: 91, Sup diff: 0.000022
+%  Iteration: 101, Sup diff: 0.000014
+%  Iteration: 111, Sup diff: 0.000009
+%  Iteration: 121, Sup diff: 0.000006
+%  Iteration: 131, Sup diff: 0.000004
+%  Iteration: 141, Sup diff: 0.000003
+%  Iteration: 151, Sup diff: 0.000002
+%  Iteration: 161, Sup diff: 0.000001
+% 历时 729.139481 秒。
+
+save ShashaWang_JFV_PS1_250_capital_grid_points
+%  Iteration:  1, Sup diff: 0.006056
+%  Iteration: 11, Sup diff: 0.000830
+%  Iteration: 21, Sup diff: 0.000484
+%  Iteration: 31, Sup diff: 0.000300
+%  Iteration: 41, Sup diff: 0.000190
+%  Iteration: 51, Sup diff: 0.000122
+%  Iteration: 61, Sup diff: 0.000079
+%  Iteration: 71, Sup diff: 0.000051
+%  Iteration: 81, Sup diff: 0.000033
+%  Iteration: 91, Sup diff: 0.000022
+%  Iteration: 101, Sup diff: 0.000014
+%  Iteration: 111, Sup diff: 0.000009
+%  Iteration: 121, Sup diff: 0.000006
+%  Iteration: 131, Sup diff: 0.000004
+%  Iteration: 141, Sup diff: 0.000003
+%  Iteration: 151, Sup diff: 0.000002
+%  Iteration: 161, Sup diff: 0.000001
+% 历时 2263.827634 秒。
+
+%% 6. Value function iteration using Accelerator
+
+%% Required matrices and vectors
+
+mValue0        = utilitySteadyState.*ones(Nk,Na);
+inputs.mValue0 = mValue0;
+mValue         = zeros(Nk,Na);
+mKPolicy        = zeros(Nk,Na);
+mLaborPolicy_1 = zeros(Nk,Na);
+mLaborPolicy_2 = zeros(Nk,Na); 
+mConsumptionPolicy_1   = zeros(Nk,Na);
+mConsumptionPolicy_2   = zeros(Nk,Na);
+
+%% Main iteration
+maxIter = 10000;
+tolerance     = 1e-6;
+
+iteration       = 1;
+mDifference = zeros(maxIter,1);
+mDifference(iteration) = 100;
+
+options = optimset('Display', 'off');
+opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
 % laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
 
-% Compute marginal utility of today
-for ia = 1:Na
-    a = mGrid_a1a2(ia,:);
-    a_1 = mGrid_a1a2(ia,1);
-    a_2 = mGrid_a1a2(ia,2);        
-    
-    for ik = 1:Nk
-%         k = vGrid_k(ik);
-        kPrime = mKPolicy(ik,ia);
-%         kPrimePrime = depend on aPrime
-%         vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-        [v,ikPrime]=min(abs(kPrime - vGrid_k));
+tic
+
+% Finding value and policy functions numerically
+while iteration <= maxIter && mDifference(iteration) > tolerance
+    expectedValue0 = mValue0 * mProb_a1a2'; % row: kPrime, column: a, i.e., expected value if today's shock is a and I choose k as tomorrow's capital stock
+%     inputs.expectedValue0 = expectedValue0;
+
+    for ia = 1:Na
+%         a = mGrid_a1a2(ia,:);
+        a_1 = mGrid_a1a2(ia,1);
+        a_2 = mGrid_a1a2(ia,2);
         
-        consumption_1 = mConsumptionPolicy_1(ik,ia);
-        consumption_2 = mConsumptionPolicy_2(ik,ia);
-%         labor_1 = mLaborPolicy_1(ik,ia);
-%         labor_2 = mLaborPolicy_2(ik,ia);
-%         laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
-%         leftHandSideOfEulerEquation(ik,ia) = mmu_1 * (a_2 * labor_2)^mmu_2 * ...
-%             (a_1 * k^aalphaK * labor_1^aalphaL + (1-ddelta) * k - kPrime)^(mmu_1-1);
-       
-        marginalUtilityToday = mmu_1 * (consumption_2)^mmu_2 * (consumption_1)^(mmu_1-1);
-        leftHandSideOfEulerEquation(ik,ia) = marginalUtilityToday;
-        
-% Compute expected marginal utility of tomorrow
-        expected = zeros(Na,1);
-        
-        for iaPrime = 1:Na
-            aPrime = mGrid_a1a2(iaPrime,:);
-            aPrime_1 = mGrid_a1a2(iaPrime,1);
-            aPrime_2 = mGrid_a1a2(iaPrime,2); 
+        for ik = 1:Nk
+            k = vGrid_k(ik);
             
-%             kPrimePrime = mKPolicy(ikPrime,iaPrime);
-            consumptionPrime_1 = mConsumptionPolicy_1(ikPrime,iaPrime);
-            consumptionPrime_2 = mConsumptionPolicy_2(ikPrime,iaPrime);
-            laborPrime_1 = mLaborPolicy_1(ikPrime,iaPrime);
-            
-            marginalUtilityTomorrow = mmu_1 * (consumptionPrime_2)^mmu_2 * (consumptionPrime_1)^(mmu_1-1);
-            returnOnCapital = 1 - ddelta + aPrime_1 * laborPrime_1^aalphaL * aalphaK * (kPrime)^(aalphaK-1);
-            
-            unexpected = bbeta * marginalUtilityTomorrow * returnOnCapital;
-            expected(iaPrime) = unexpected * mProb_a1a2(ia,iaPrime);
+            if mod(iteration,10) == 1
+                
+                if ik ==1
+                        
+                    [kPrime, fval] = fminbnd(@(kPrime) ...
+                        -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                        vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+   
+                else
+                    [kPrime, fval] = fminbnd(@(kPrime) ...
+                    -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                    mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+
+                end
+                mKPolicy(ik,ia) = kPrime;
+                mValue(ik,ia) = -fval;    
+
+%             if mDifference(iteration) < tolerance*10 % Store the policy functions in case it's the last iteration
+    %                 vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+    %                 mLaborPolicy_1(ik,ia) = vLabor(1);
+    %                 mLaborPolicy_2(ik,ia) = vLabor(2);
+    %                 mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
+    %                 mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
+    %                 laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
+    %                 inputs.laborInitial = laborInitial;
+                mLaborPolicy_1(ik,ia) = interp1(vGrid_k,mLabor_1Fsolve(:,ia,ik),kPrime);
+                mLaborPolicy_2(ik,ia) = interp1(vGrid_k,mLabor_2Fsolve(:,ia,ik),kPrime);
+                mConsumptionPolicy_1(ik,ia) = interp1(vGrid_k,mConsumption_1Fsolve(:,ia,ik),kPrime);
+                mConsumptionPolicy_2(ik,ia) = interp1(vGrid_k,mConsumption_2Fsolve(:,ia,ik),kPrime);
+%             end
+            else
+                currentUtility = interp1(vGrid_k,mCurrentUtilityFsolve(:,ia,ik),mKPolicy(ik,ia));
+                expectedValue = interp1(vGrid_k,expectedValue0(:,ia),mKPolicy(ik,ia));
+                value = (1-bbeta)*currentUtility + bbeta * expectedValue;
+                mValue(ik,ia) = value;
+            end
         end
-        rightHandSideOfEulerEquation(ik,ia) = sum(expected);
     end
+    
+    iteration = iteration + 1;
+    mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
+    mValue0         = mValue;
+    
+    if mod(iteration,10) == 2
+        fprintf(' Iteration: %2.0f, Sup diff: %2.6f\n', iteration-1, mDifference(iteration)); 
+    end
+    
+%     inputs.valueFunction0 = mValue0;
+%     inputs.laborFunction  = mLaborPolicy_1;
+%     policyFunction0       = mKPolicy;
+
+% A problem lies that is convergence is achieved not at the time when you
+% do the maximization, would the value function still be accurate? Wait for
+% Prof. JFV to respond.
 end
 
-errorEulerEquationNoLinearInterpolation = abs(leftHandSideOfEulerEquation - rightHandSideOfEulerEquation);
-errorEulerEquationNoLinearInterpolationDecimalLog = log10( errorEulerEquationNoLinearInterpolation );
+toc
 
-figure(8);
-mesh(kk, aa, errorEulerEquationNoLinearInterpolationDecimalLog');
+%% figures for Value Function Iteration with Accelerator
 
-title('Euler Equation Error $log_{10}$ No Linear Interpolation','interpreter','latex')
+figure;
+[kk,aa]=meshgrid(vGrid_k, mGrid_a1a2(:,1));
+mesh(kk, aa, mValue');
+
+title('Value - Accelerator','interpreter','latex')
 xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
+zlabel('Value','interpreter','latex')
+xlim([min(vGrid_k),max(vGrid_k)])
+ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+savefig('q3_value_accelerator')
+
+figure;
+mesh(kk, aa, mKPolicy');
+
+title('Policy for Next Period Capital - Accelerator','interpreter','latex')
+xlabel('Capital Stock $k$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
+zlabel('Next Period Capital $k\prime$','interpreter','latex')
+xlim([min(vGrid_k),max(vGrid_k)])
+ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+savefig('q3_kPolicy_accelerator')
+
+figure;
+mesh(kk, aa, mLaborPolicy_1');
+
+title('Policy for Good 1 Labor - Accelerator','interpreter','latex')
+xlabel('Capital Stock $k$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
+zlabel('Good 1 Labor','interpreter','latex')
+xlim([min(vGrid_k),max(vGrid_k)])
+ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+savefig('q3_laborPolicy_1_accelerator')
+
+figure;
+mesh(kk, aa, mLaborPolicy_2');
+
+title('Policy for Good 2 Labor - Accelerator','interpreter','latex')
+xlabel('Capital Stock $k$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
+zlabel('Good 2 Labor','interpreter','latex')
+xlim([min(vGrid_k),max(vGrid_k)])
+ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+savefig('q3_laborPolicy_2_accelerator')
+
+figure;
+mesh(kk, aa, mConsumptionPolicy_1');
+
+title('Policy for Good 1 Consumption - Accelerator','interpreter','latex')
+xlabel('Capital Stock $k$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
+zlabel('Good 1 Consumption','interpreter','latex')
+xlim([min(vGrid_k),max(vGrid_k)])
+ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+savefig('q3_consumptionPolicy_1_accelerator')
+
+figure;
+mesh(kk, aa, mConsumptionPolicy_2');
+
+title('Policy for Good 2 Consumption - Accelerator','interpreter','latex')
+xlabel('Capital Stock $k$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
+zlabel('Good 2 Consumption','interpreter','latex')
+xlim([min(vGrid_k),max(vGrid_k)])
+ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
+savefig('q3_consumptionPolicy_2_accelerator')
+
+
+%% For accuracy test, compute the euler equation error
+errorEulerEquationLinearInterpolationAccelerator = eulerEquationErrorFunction(Nk,vGrid_k,mKPolicy,mLaborPolicy_1,mConsumptionPolicy_1,mConsumptionPolicy_2,Na,mGrid_a1a2,mProb_a1a2,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL);
+errorEulerEquationLinearInterpolationAcceleratorDecimalLog = log10( errorEulerEquationLinearInterpolationAccelerator );
+
+figure;
+mesh(kk, aa, errorEulerEquationLinearInterpolationAcceleratorDecimalLog');
+
+title('Euler Equation Error $log_{10}$ Linear Interpolation - Accelerator','interpreter','latex')
+xlabel('Capital Stock $k$','interpreter','latex')
+ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('error','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_eulerEquationErrorNoLinearInterpolation_3D')
+savefig('q3_eulerEquationErrorLinearInterpolation_accelerator')
+% save ShashaWang_JFV_PS1_60_capital_grid_points_accelerator
+%  Iteration:  1, Sup diff: 0.003807
+%  Iteration: 11, Sup diff: 0.001170
+%  Iteration: 21, Sup diff: 0.000566
+%  Iteration: 31, Sup diff: 0.000351
+%  Iteration: 41, Sup diff: 0.000223
+%  Iteration: 51, Sup diff: 0.000144
+%  Iteration: 61, Sup diff: 0.000093
+%  Iteration: 71, Sup diff: 0.000060
+%  Iteration: 81, Sup diff: 0.000039
+%  Iteration: 91, Sup diff: 0.000026
+%  Iteration: 101, Sup diff: 0.000017
+%  Iteration: 111, Sup diff: 0.000011
+%  Iteration: 121, Sup diff: 0.000007
+%  Iteration: 131, Sup diff: 0.000005
+%  Iteration: 141, Sup diff: 0.000003
+%  Iteration: 151, Sup diff: 0.000002
+%  Iteration: 161, Sup diff: 0.000001
+% 历时 183.795166 秒。
 
-% Then let's use LINEAR INTERPOLATION for tomorrow's values
+% save ShashaWang_JFV_PS1_100_capital_grid_points_accelerator
+%  Iteration: 41, Sup diff: 0.000854
+%  Iteration: 51, Sup diff: 0.000568
+%  Iteration: 61, Sup diff: 0.000378
+%  Iteration: 71, Sup diff: 0.000251
+%  Iteration: 81, Sup diff: 0.000167
+%  Iteration: 91, Sup diff: 0.000111
+%  Iteration: 101, Sup diff: 0.000074
+%  Iteration: 111, Sup diff: 0.000049
+%  Iteration: 121, Sup diff: 0.000033
+%  Iteration: 131, Sup diff: 0.000022
+%  Iteration: 141, Sup diff: 0.000014
+%  Iteration: 151, Sup diff: 0.000010
+%  Iteration: 161, Sup diff: 0.000006
+%  Iteration: 171, Sup diff: 0.000004
+%  Iteration: 181, Sup diff: 0.000003
+%  Iteration: 191, Sup diff: 0.000002
+%  Iteration: 201, Sup diff: 0.000001
+% 历时 327.309912 秒。
 
-errorEulerEquationLinearInterpolation = eulerEquationErrorFunction(Nk,vGrid_k,mKPolicy,mLaborPolicy_1,mConsumptionPolicy_1,mConsumptionPolicy_2,Na,mGrid_a1a2,mProb_a1a2,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL);
-errorEulerEquationLinearInterpolationDecimalLog = log10( errorEulerEquationLinearInterpolation );
+% After I take advantage of the monotonicity of capital policy function wrt
+% capital, the process speeds up a lot
+%  Iteration:  1, Sup diff: 0.006262
+%  Iteration: 11, Sup diff: 0.001010
+%  Iteration: 21, Sup diff: 0.000705
+%  Iteration: 31, Sup diff: 0.000379
+%  Iteration: 41, Sup diff: 0.000242
+%  Iteration: 51, Sup diff: 0.000157
+%  Iteration: 61, Sup diff: 0.000102
+%  Iteration: 71, Sup diff: 0.000066
+%  Iteration: 81, Sup diff: 0.000043
+%  Iteration: 91, Sup diff: 0.000028
+%  Iteration: 101, Sup diff: 0.000019
+%  Iteration: 111, Sup diff: 0.000012
+%  Iteration: 121, Sup diff: 0.000008
+%  Iteration: 131, Sup diff: 0.000005
+%  Iteration: 141, Sup diff: 0.000003
+%  Iteration: 151, Sup diff: 0.000002
+%  Iteration: 161, Sup diff: 0.000002
+%  Iteration: 171, Sup diff: 0.000001
+% 历时 131.402012 秒。
 
-figure(9);
-mesh(kk, aa, errorEulerEquationLinearInterpolationDecimalLog');
+save ShashaWang_JFV_PS1_250_capital_grid_points_accelerator
+%  Iteration:  1, Sup diff: 0.006056
+%  Iteration: 11, Sup diff: 0.000997
+%  Iteration: 21, Sup diff: 0.000681
+%  Iteration: 31, Sup diff: 0.000371
+%  Iteration: 41, Sup diff: 0.000237
+%  Iteration: 51, Sup diff: 0.000153
+%  Iteration: 61, Sup diff: 0.000099
+%  Iteration: 71, Sup diff: 0.000065
+%  Iteration: 81, Sup diff: 0.000042
+%  Iteration: 91, Sup diff: 0.000028
+%  Iteration: 101, Sup diff: 0.000018
+%  Iteration: 111, Sup diff: 0.000012
+%  Iteration: 121, Sup diff: 0.000008
+%  Iteration: 131, Sup diff: 0.000005
+%  Iteration: 141, Sup diff: 0.000003
+%  Iteration: 151, Sup diff: 0.000002
+%  Iteration: 161, Sup diff: 0.000001
+%  Iteration: 171, Sup diff: 0.000001
+% 历时 410.257604 秒。
 
-title('Euler Equation Error $log_{10}$ Linear Interpolation','interpreter','latex')
-xlabel('Capital Stock $k$','interpreter','latex')
-ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-zlabel('error','interpreter','latex')
-xlim([min(vGrid_k),max(vGrid_k)])
-ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_eulerEquationErrorLinearInterpolation_3D')
+%% 7. Multigrid
+% Use multigrid method to speed up iteration
+% I didn't choose [100 500 5000] because I choose Nk = 100 for fixed grid
+% instead of 250 as required.
+kGridLength = [100,500,5000]; % number of points in grid for capital 
+Nk = max(kGridLength);
+
+%% Required matrices and vectors
+
+mValue0        = utilitySteadyState.*ones(kGridLength(1),Na);
+inputs.mValue0 = mValue0;
+mValue         = zeros(kGridLength(1),Na);
+mKPolicy        = zeros(kGridLength(1),Na);
+mLaborPolicy_1 = zeros(kGridLength(1),Na);
+mLaborPolicy_2 = zeros(kGridLength(1),Na); 
+mConsumptionPolicy_1   = zeros(kGridLength(1),Na);
+mConsumptionPolicy_2   = zeros(kGridLength(1),Na);
 
 
 
@@ -435,164 +891,84 @@ savefig('q3_eulerEquationErrorLinearInterpolation_3D')
 
 
 
+for i=1:length(kGridLength)
+    vGrid_k           = linspace(kMin,kMax,kGridLength(i))';
+    % steady state
+    % efficiency matrices
+    % iteration
 
 
+%% Main iteration
+maxIter = 10000;
+tolerance     = 1e-6;
 
+iteration       = 1;
+mDifference = zeros(maxIter,1);
+mDifference(iteration) = 100;
 
-% %% 6. Value function iteration using Accelerator
-% mValue0        = utilitySteadyState.*ones(Nk,Na);
-% inputs.mValue0 = mValue0;
-% mValue         = zeros(Nk,Na);
-% mKPolicy        = zeros(Nk,Na);
-% mLaborPolicy_1 = zeros(Nk,Na);
-% mLaborPolicy_2 = zeros(Nk,Na); 
-% mConsumptionPolicy_1   = zeros(Nk,Na);
-% mConsumptionPolicy_2   = zeros(Nk,Na);
-% 
-% %% Main iteration
-% maxIter = 10000;
-% tolerance     = 1e-6;
-% 
-% iteration       = 1;
-% mDifference = zeros(maxIter,1);
-% mDifference(iteration) = 100;
-% 
-% options = optimset('Display', 'off');
-% opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
+options = optimset('Display', 'off');
+opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
 % laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
-% 
-% tic
-% 
-% % Finding value and policy functions numerically
-% while iteration <= maxIter && mDifference(iteration) > tolerance
-%     expectedValue0 = mValue0 * mProb_a1a2';
-% %     inputs.expectedValue0 = expectedValue0;
-% 
-%     for ia = 1:Na
-% %         a = mGrid_a1a2(ia,:);
-%         a_1 = mGrid_a1a2(ia,1);
-%         a_2 = mGrid_a1a2(ia,2);
-%         
-%         for ik = 1:Nk
-%             k = vGrid_k(ik);
-%                         
-%             [kPrime, vAux] = fminbnd(@(kPrime) ...
-%                 -valueFunction(kPrime,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-%                 max(0.8*vGrid_k(ik),vGrid_k(1)),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
-%             mKPolicy(ik,ia) = kPrime;
-%             mValue(ik,ia) = -vAux;            
-%             
-%  %% If we can retrieve other outputs of the objective function of fminbnd, it would be much easier and FASTER to get the labor and consumption policy function
-%             if mDifference(iteration) < tolerance*10 % Store the policy functions in case it's the last iteration
+
+tic
+
+% Finding value and policy functions numerically
+while iteration <= maxIter && mDifference(iteration) > tolerance
+    expectedValue0 = mValue0 * mProb_a1a2'; % row: kPrime, column: a, i.e., expected value if today's shock is a and I choose k as tomorrow's capital stock
+%     inputs.expectedValue0 = expectedValue0;
+
+    for ia = 1:Na
+%         a = mGrid_a1a2(ia,:);
+        a_1 = mGrid_a1a2(ia,1);
+        a_2 = mGrid_a1a2(ia,2);
+        
+        for ik = 1:Nk
+            k = vGrid_k(ik);
+            
+            if ik ==1
+                        
+                [kPrime, fval] = fminbnd(@(kPrime) ...
+                    -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                    vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);       
+            else
+                [kPrime, fval] = fminbnd(@(kPrime) ...
+                    -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                    mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+            end
+            
+            mKPolicy(ik,ia) = kPrime;
+            mValue(ik,ia) = -fval;     
+            
+ %% If we can retrieve other outputs of the objective function of fminbnd, it would be much easier and FASTER to get the labor and consumption policy function
+            if mDifference(iteration) < tolerance*10 % Store the policy functions in case it's the last iteration
 %                 vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
 %                 mLaborPolicy_1(ik,ia) = vLabor(1);
 %                 mLaborPolicy_2(ik,ia) = vLabor(2);
 %                 mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
 %                 mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
 %                 laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
-% %                 inputs.laborInitial = laborInitial;
-% 
-%             end
-%         end
-%     end
-%     
-%     iteration = iteration + 1;
-%     mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
-%     mValue0         = mValue;
-%     
-%     if mod(iteration,10) == 2
-%         fprintf(' Iteration: %2.0f, Sup diff: %2.6f\n', iteration-1, mDifference(iteration)); 
-%     end
-%     
-% %     inputs.valueFunction0 = mValue0;
-% %     inputs.laborFunction  = mLaborPolicy_1;
-% %     policyFunction0       = mKPolicy;
-% end
-% 
-% toc
-% 
-% %% figures for Value Function Iteration with Accelerator
-% 
-% figure;
-% [kk,aa]=meshgrid(vGrid_k, mGrid_a1a2(:,1));
-% mesh(kk, aa, mValue');
-% 
-% title('Value Under Different Shocks','interpreter','latex')
-% xlabel('Capital Stock $k$','interpreter','latex')
-% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-% zlabel('Value','interpreter','latex')
-% xlim([min(vGrid_k),max(vGrid_k)])
-% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-% savefig('q3_value_3D')
-% 
-% figure;
-% mesh(kk, aa, mKPolicy');
-% 
-% title('Policy for Next Period Capital Under Different Shocks','interpreter','latex')
-% xlabel('Capital Stock $k$','interpreter','latex')
-% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-% zlabel('Next Period Capital $k\prime$','interpreter','latex')
-% xlim([min(vGrid_k),max(vGrid_k)])
-% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-% savefig('q3_kPolicy_3D')
-% 
-% figure;
-% mesh(kk, aa, mLaborPolicy_1');
-% 
-% title('Policy for Good 1 Labor Under Different Shock','interpreter','latex')
-% xlabel('Capital Stock $k$','interpreter','latex')
-% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-% zlabel('Good 1 Labor','interpreter','latex')
-% xlim([min(vGrid_k),max(vGrid_k)])
-% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-% savefig('q3_laborPolicy_1_3D')
-% 
-% figure;
-% mesh(kk, aa, mLaborPolicy_2');
-% 
-% title('Policy for Good 2 Labor Under Different Shock','interpreter','latex')
-% xlabel('Capital Stock $k$','interpreter','latex')
-% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-% zlabel('Good 2 Labor','interpreter','latex')
-% xlim([min(vGrid_k),max(vGrid_k)])
-% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-% savefig('q3_laborPolicy_2_3D')
-% 
-% figure;
-% mesh(kk, aa, mConsumptionPolicy_1');
-% 
-% title('Policy for Good 1 Consumption Under Different Shock','interpreter','latex')
-% xlabel('Capital Stock $k$','interpreter','latex')
-% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-% zlabel('Good 1 Consumption','interpreter','latex')
-% xlim([min(vGrid_k),max(vGrid_k)])
-% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-% savefig('q3_consumptionPolicy_1_3D')
-% 
-% figure;
-% mesh(kk, aa, mConsumptionPolicy_2');
-% 
-% title('Policy for Good 2 Consumption Under Different Shocks','interpreter','latex')
-% xlabel('Capital Stock $k$','interpreter','latex')
-% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-% zlabel('Good 2 Consumption','interpreter','latex')
-% xlim([min(vGrid_k),max(vGrid_k)])
-% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-% savefig('q3_consumptionPolicy_2_3D')
-% 
-% save ShashaWang_JFV_PS1_10_capital_grid_points_accelerator
-% 
-% %% For accuracy test, compute the euler equation error
-% errorEulerEquationLinearInterpolation = eulerEquationErrorFunction(Nk,vGrid_k,mKPolicy,mLaborPolicy_1,mConsumptionPolicy_1,mConsumptionPolicy_2,Na,mGrid_a1a2,mProb_a1a2,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL);
-% errorEulerEquationLinearInterpolationDecimalLog = log10( errorEulerEquationLinearInterpolation );
-% 
-% figure;
-% mesh(kk, aa, errorEulerEquationLinearInterpolationDecimalLog');
-% 
-% title('Euler Equation Error $log_{10}$ Linear Interpolation','interpreter','latex')
-% xlabel('Capital Stock $k$','interpreter','latex')
-% ylabel('shocks $z_1$ $z_2$','interpreter','latex')
-% zlabel('error','interpreter','latex')
-% xlim([min(vGrid_k),max(vGrid_k)])
-% ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-% savefig('q3_eulerEquationErrorLinearInterpolation_3D')
+%                 inputs.laborInitial = laborInitial;
+                mLaborPolicy_1(ik,ia) = interp1(vGrid_k,mLabor_1Fsolve(:,ia,ik),kPrime);
+                mLaborPolicy_2(ik,ia) = interp1(vGrid_k,mLabor_2Fsolve(:,ia,ik),kPrime);
+                mConsumptionPolicy_1(ik,ia) = interp1(vGrid_k,mConsumption_1Fsolve(:,ia,ik),kPrime);
+                mConsumptionPolicy_2(ik,ia) = interp1(vGrid_k,mConsumption_2Fsolve(:,ia,ik),kPrime);
+            end
+        end
+    end
+    
+    iteration = iteration + 1;
+    mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
+    mValue0         = mValue;
+    
+    if mod(iteration,10) == 2
+        fprintf(' Iteration: %2.0f, Sup diff: %2.6f\n', iteration-1, mDifference(iteration)); 
+    end
+    
+%     inputs.valueFunction0 = mValue0;
+%     inputs.laborFunction  = mLaborPolicy_1;
+%     policyFunction0       = mKPolicy;
+end
+
+toc
+
+save ShashaWang_JFV_PS1_250_capital_grid_points_multigrid
