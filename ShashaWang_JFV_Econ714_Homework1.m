@@ -642,24 +642,78 @@ while iteration <= maxIter  ...
         && ( (mDifference(iteration) > tolerance)  | (mDifference(iteration) <= tolerance && mod(iteration,10)~=2)) % make sure the last iteration does the maximization
     
     expectedValue0 = mValue0 * mProb_a1a2'; % row: kPrime, column: a, i.e., expected value if today's shock is a and I choose k as tomorrow's capital stock
-%     inputs.expectedValue0 = expectedValue0;
+    if (mDifference(iteration) > tolerance)
+        for ia = 1:Na
+    %         a = mGrid_a1a2(ia,:);
+            a_1 = mGrid_a1a2(ia,1);
+            a_2 = mGrid_a1a2(ia,2);
 
-    for ia = 1:Na
-%         a = mGrid_a1a2(ia,:);
-        a_1 = mGrid_a1a2(ia,1);
-        a_2 = mGrid_a1a2(ia,2);
+            for ik = 1:Nk
+                k = vGrid_k(ik);
+
+                if mod(iteration,10) == 1
+
+                    if ik ==1
+
+                        [kPrime, fval] = fminbnd(@(kPrime) ...
+                            -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                            vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+
+                    else
+                        [kPrime, fval] = fminbnd(@(kPrime) ...
+                        -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                        mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+
+                    end
+                    mKPolicy(ik,ia) = kPrime;
+                    mValue(ik,ia) = -fval;    
+
+    %             if mDifference(iteration) < tolerance*10 % Store the policy functions in case it's the last iteration
+        %                 vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+        %                 mLaborPolicy_1(ik,ia) = vLabor(1);
+        %                 mLaborPolicy_2(ik,ia) = vLabor(2);
+        %                 mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
+        %                 mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
+        %                 laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
+        %                 inputs.laborInitial = laborInitial;
+                    mLaborPolicy_1(ik,ia) = interp1(vGrid_k,mLabor_1Fsolve(:,ia,ik),kPrime);
+                    mLaborPolicy_2(ik,ia) = interp1(vGrid_k,mLabor_2Fsolve(:,ia,ik),kPrime);
+                    mConsumptionPolicy_1(ik,ia) = interp1(vGrid_k,mConsumption_1Fsolve(:,ia,ik),kPrime);
+                    mConsumptionPolicy_2(ik,ia) = interp1(vGrid_k,mConsumption_2Fsolve(:,ia,ik),kPrime);
+    %             end
+                else
+                    currentUtility = interp1(vGrid_k,mCurrentUtilityFsolve(:,ia,ik),mKPolicy(ik,ia));
+                    expectedValue = interp1(vGrid_k,expectedValue0(:,ia),mKPolicy(ik,ia));
+                    value = (1-bbeta)*currentUtility + bbeta * expectedValue;
+                    mValue(ik,ia) = value;
+                end
+            end
+        end
         
-        for ik = 1:Nk
-            k = vGrid_k(ik);
-            
-            if mod(iteration,10) == 1
-                
+        iteration = iteration + 1;
+        mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
+        mValue0         = mValue;
+
+        if mod(iteration,10) == 2
+            fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
+        end
+        
+    else
+        for ia = 1:Na
+    %         a = mGrid_a1a2(ia,:);
+            a_1 = mGrid_a1a2(ia,1);
+            a_2 = mGrid_a1a2(ia,2);
+
+            for ik = 1:Nk
+                k = vGrid_k(ik);
+
+
                 if ik ==1
-                        
+
                     [kPrime, fval] = fminbnd(@(kPrime) ...
                         -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
                         vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
-   
+
                 else
                     [kPrime, fval] = fminbnd(@(kPrime) ...
                     -valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
@@ -682,35 +736,24 @@ while iteration <= maxIter  ...
                 mConsumptionPolicy_1(ik,ia) = interp1(vGrid_k,mConsumption_1Fsolve(:,ia,ik),kPrime);
                 mConsumptionPolicy_2(ik,ia) = interp1(vGrid_k,mConsumption_2Fsolve(:,ia,ik),kPrime);
 %             end
-            else
-                currentUtility = interp1(vGrid_k,mCurrentUtilityFsolve(:,ia,ik),mKPolicy(ik,ia));
-                expectedValue = interp1(vGrid_k,expectedValue0(:,ia),mKPolicy(ik,ia));
-                value = (1-bbeta)*currentUtility + bbeta * expectedValue;
-                mValue(ik,ia) = value;
             end
         end
-    end
-    
-    iteration = iteration + 1;
-    mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
-    mValue0         = mValue;
-    
-    if mod(iteration,10) == 2
-        fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
-    end
-    
-%     inputs.valueFunction0 = mValue0;
-%     inputs.laborFunction  = mLaborPolicy_1;
-%     policyFunction0       = mKPolicy;
+        
+        iteration = iteration + 1;
+        mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
+        mValue0         = mValue;
 
-% A problem lies that is convergence is achieved not at the time when you
-% do the maximization, would the value function still be accurate? Wait for
-% Prof. JFV to respond.
+        fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
+        break
+    end
+    
+    
+
 end
 
 toc
 
-fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
+fprintf(' Convergence achieved. Total Number of Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
 
 %% figures for Value Function Iteration with Accelerator
 
@@ -1004,7 +1047,7 @@ for i=1:length(kGridLength)
     %     policyFunction0       = mKPolicy;
     end
     
-    fprintf(' Convergence Achieved. \n Number of Grid Points: %2.0f\n Iteration: %2.0f, Sup difference: %2.6f\n ', kGridLength(i),iteration-1, mDifference(iteration)); 
+    fprintf(' Convergence Achieved. \n Number of Grid Points: %2.0f\n Iteration: %2.0f, Sup difference: %2.8f\n ', kGridLength(i),iteration-1, mDifference(iteration)); 
     
     % Store result for this grid point
     cValueMultigrid{i}= mValue;
@@ -1186,18 +1229,66 @@ for i=1:length(kGridLength)
     while iteration <= maxIter ...
             && ( (mDifference(iteration) > tolerance)  | (mDifference(iteration) <= tolerance && mod(iteration,10)~=2)) % make sure the last iteration does the maximization
         
-        expectedValue0 = mValue0 * mProb_a1a2'; % row: kPrime, column: a, i.e., expected value if today's shock is a and I choose k as tomorrow's capital stock
-    %     inputs.expectedValue0 = expectedValue0;
+        if mDifference(iteration) > tolerance % do the value function iteration with the accelerator
+            
+            expectedValue0 = mValue0 * mProb_a1a2'; % row: kPrime, column: a, i.e., expected value if today's shock is a and I choose k as tomorrow's capital stock
+        %     inputs.expectedValue0 = expectedValue0;
 
-        for ia = 1:Na
-    %         a = mGrid_a1a2(ia,:);
-            a_1 = mGrid_a1a2(ia,1);
-            a_2 = mGrid_a1a2(ia,2);
+            for ia = 1:Na
+        %         a = mGrid_a1a2(ia,:);
+                a_1 = mGrid_a1a2(ia,1);
+                a_2 = mGrid_a1a2(ia,2);
 
-            for ik = 1:kGridLength(i)
-                k = vGrid_kMultigrid(ik);
-                
-                if mod(iteration,10) == 1
+                for ik = 1:kGridLength(i)
+                    k = vGrid_kMultigrid(ik);
+
+                    if mod(iteration,10) == 1
+
+                        if ik ==1
+
+                            [kPrime, fval] = fminbnd(@(kPrime) ...
+                                -valueFunctionMultigrid(kPrime,k,ik,ia,a_1,a_2,expectedValue0,vGrid_kMultigrid,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                                vGrid_kMultigrid(1),min(1.2*vGrid_kMultigrid(ik),vGrid_kMultigrid(end)),options);       
+                        else
+                            [kPrime, fval] = fminbnd(@(kPrime) ...
+                                -valueFunctionMultigrid(kPrime,k,ik,ia,a_1,a_2,expectedValue0,vGrid_kMultigrid,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                                mKPolicy((ik-1),ia),min(1.2*vGrid_kMultigrid(ik),vGrid_kMultigrid(end)),options);
+                        end
+
+                        % Policy function has to be filled in every 10th
+                        % time 
+                        mKPolicy(ik,ia) = kPrime;
+                        mValue(ik,ia) = -fval;     
+                        mLaborPolicy_1(ik,ia) = interp2(vGrid_k,vGrid_k,mLabor_1Fsolve(:,:,ia),kPrime,k);
+                        mLaborPolicy_2(ik,ia) = interp2(vGrid_k,vGrid_k,mLabor_2Fsolve(:,:,ia),kPrime,k);
+                        mConsumptionPolicy_1(ik,ia) = interp2(vGrid_k,vGrid_k,mConsumption_1Fsolve(:,:,ia),kPrime,k);
+                        mConsumptionPolicy_2(ik,ia) = interp2(vGrid_k,vGrid_k,mConsumption_2Fsolve(:,:,ia),kPrime,k);
+                    else
+                        currentUtility = interp2(vGrid_k,vGrid_k,mCurrentUtilityFsolve(:,:,ia),mKPolicy(ik,ia),k);
+                        expectedValue = interp1(vGrid_kMultigrid,expectedValue0(:,ia),mKPolicy(ik,ia));
+                        value = (1-bbeta)*currentUtility + bbeta * expectedValue;
+                        mValue(ik,ia) = value;
+                    end
+                end
+            end
+
+            iteration = iteration + 1;
+            mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
+            mValue0         = mValue;
+
+    %         if mod(iteration,10) == 2
+                fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
+    %         end
+        else % do the value function iteration without the accelerator
+            expectedValue0 = mValue0 * mProb_a1a2'; % row: kPrime, column: a, i.e., expected value if today's shock is a and I choose k as tomorrow's capital stock
+
+            for ia = 1:Na
+                a_1 = mGrid_a1a2(ia,1);
+                a_2 = mGrid_a1a2(ia,2);
+
+                for ik = 1:kGridLength(i)
+                    k = vGrid_kMultigrid(ik);
+
 
                     if ik ==1
 
@@ -1212,43 +1303,28 @@ for i=1:length(kGridLength)
 
                     mKPolicy(ik,ia) = kPrime;
                     mValue(ik,ia) = -fval;     
-
-%                 if mDifference(iteration) < tolerance*10 % Store the policy functions in case it's the last iteration
-    %                 vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-    %                 mLaborPolicy_1(ik,ia) = vLabor(1);
-    %                 mLaborPolicy_2(ik,ia) = vLabor(2);
-    %                 mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
-    %                 mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
-    %                 laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
-    %                 inputs.laborInitial = laborInitial;
                     mLaborPolicy_1(ik,ia) = interp2(vGrid_k,vGrid_k,mLabor_1Fsolve(:,:,ia),kPrime,k);
                     mLaborPolicy_2(ik,ia) = interp2(vGrid_k,vGrid_k,mLabor_2Fsolve(:,:,ia),kPrime,k);
                     mConsumptionPolicy_1(ik,ia) = interp2(vGrid_k,vGrid_k,mConsumption_1Fsolve(:,:,ia),kPrime,k);
                     mConsumptionPolicy_2(ik,ia) = interp2(vGrid_k,vGrid_k,mConsumption_2Fsolve(:,:,ia),kPrime,k);
-%                 end
-                else
-                    currentUtility = interp2(vGrid_k,vGrid_k,mCurrentUtilityFsolve(:,:,ia),mKPolicy(ik,ia),k);
-                    expectedValue = interp1(vGrid_kMultigrid,expectedValue0(:,ia),mKPolicy(ik,ia));
-                    value = (1-bbeta)*currentUtility + bbeta * expectedValue;
-                    mValue(ik,ia) = value;
                 end
             end
-        end
+            iteration = iteration + 1;
+            mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
+            mValue0         = mValue;
 
-        iteration = iteration + 1;
-        mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
-        mValue0         = mValue;
-
-%         if mod(iteration,10) == 2
             fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
-%         end
+            
+            
+            break
         
-    %     inputs.valueFunction0 = mValue0;
-    %     inputs.laborFunction  = mLaborPolicy_1;
-    %     policyFunction0       = mKPolicy;
+        end
+        
+        
+
     end
     
-    fprintf(' Convergence Achieved. \n Number of Grid Points: %2.0f\n Total Number of Iteration: %2.0f, Sup difference: %2.6f\n ', iteration-1, mDifference(iteration),kGridLength(i)); 
+    fprintf(' Convergence Achieved. \n Number of Grid Points: %2.0f\n Iteration: %2.0f, Sup difference: %2.8f\n ', kGridLength(i),iteration-1, mDifference(iteration)); 
     
     % Store result for this grid point
     cValueMultigrid{i}= mValue;
@@ -1261,7 +1337,7 @@ for i=1:length(kGridLength)
     cDifference{i} = mDifference(2:iteration);
 
     if i ~= length(kGridLength)
-        mValue0 = interp1(vGrid_kMultigrid, mValue,linspace(kMin, kMax, kGridLength(i+1))');% 这里不知道linspace后面要不要加'变为列向量。试试吧
+        mValue0 = interp1(vGrid_kMultigrid, mValue,linspace(kMin, kMax, kGridLength(i+1))');
         mValue  = mValue0; % Just for consistency of dimensionality. mValue can be anything you want, as long as the dimensionality is right
     %         kPolicy = interp1(grid_k,kPolicy,linspace(kMin, kMax, kGridLength(i+1)));
         mKPolicy         = zeros(kGridLength(i+1),Na);
