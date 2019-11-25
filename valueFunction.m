@@ -1,6 +1,8 @@
 function [value] = valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL)
 % function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction(kPrime,k,ik,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL)
-
+% I want to do single dimension maximization, but I also want to retrieve
+% other outputs under optimization fmincon or fminbnd or fminsearch. How to
+% do that?
     global inputs;
     vGrid_a1 = inputs.vGrid_a1;
     vGrid_a2 = inputs.vGrid_a2;
