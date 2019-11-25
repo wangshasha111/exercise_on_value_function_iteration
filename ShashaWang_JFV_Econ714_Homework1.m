@@ -744,7 +744,9 @@ while iteration <= maxIter  ...
         mValue0         = mValue;
 
         fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
-        break
+        if mDifference(iteration) <= tolerance
+            break
+        end
     end
     
     
@@ -1315,8 +1317,9 @@ for i=1:length(kGridLength)
 
             fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
             
-            
-            break
+            if mDifference(iteration) <= tolerance
+                break
+            end
         
         end
         
