@@ -1322,8 +1322,6 @@ for i=1:length(kGridLength)
             end
         
         end
-        
-        
 
     end
     
@@ -1348,13 +1346,30 @@ for i=1:length(kGridLength)
         mLaborPolicy_2         = zeros(kGridLength(i+1),Na);
         mConsumptionPolicy_1         = zeros(kGridLength(i+1),Na);
         mConsumptionPolicy_2         = zeros(kGridLength(i+1),Na);
-        
-        
     end
     
 end
 
 toc
+%  Iteration:  1, Sup diff: 0.00000092
+%  Convergence Achieved. 
+%  Number of Grid Points: 100
+%  Iteration:  1, Sup difference: 0.00000092
+%   Iteration:  1, Sup diff: 0.00000213
+%  Iteration:  2, Sup diff: 0.00000199
+%  Iteration:  3, Sup diff: 0.00000186
+%  Iteration:  4, Sup diff: 0.00000078
+%  Iteration:  5, Sup diff: 0.00000075
+%  Convergence Achieved. 
+%  Number of Grid Points: 500
+%  Iteration:  5, Sup difference: 0.00000075
+%   Iteration:  1, Sup diff: 0.00000106
+%  Iteration:  2, Sup diff: 0.00000085
+%  Iteration:  3, Sup diff: 0.00000080
+%  Convergence Achieved. 
+%  Number of Grid Points: 5000
+%  Iteration:  3, Sup difference: 0.00000080
+%  ¿˙ ± 1628.871967 √Î°£
 
 %% For accuracy test, compute the euler equation error
 errorEulerEquationLinearInterpolationAccelerator = eulerEquationErrorFunction(Nk,vGrid_kMultigrid,mKPolicy,mLaborPolicy_1,mConsumptionPolicy_1,mConsumptionPolicy_2,Na,mGrid_a1a2,mProb_a1a2,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL);
@@ -1371,9 +1386,9 @@ ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('error','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_eulerEquationErrorLinearInterpolation_multigrid&accelerator')
+savefig('q3_eulerEquationErrorLinearInterpolation_multigridANDaccelerator')
 
-save ShashaWang_JFV_PS1_250_capital_grid_points_multigrid&accelerator
+save ShashaWang_JFV_PS1_250_capital_grid_points_multigridANDaccelerator
 
 %% Figures for multigrid WITH accelerator
 figure;
@@ -1385,7 +1400,7 @@ ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Value','interpreter','latex')
 xlim([min(vGrid_kMultigrid),max(vGrid_kMultigrid)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_value_multigrid&accelerator')
+savefig('q3_value_multigridANDaccelerator')
 
 figure;
 mesh(kk, aa, mKPolicy');
@@ -1396,7 +1411,7 @@ ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Next Period Capital $k\prime$','interpreter','latex')
 xlim([min(vGrid_kMultigrid),max(vGrid_kMultigrid)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_kPolicy_multigrid&accelerator')
+savefig('q3_kPolicy_multigridANDaccelerator')
 
 figure;
 mesh(kk, aa, mLaborPolicy_1');
@@ -1407,7 +1422,7 @@ ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 1 Labor','interpreter','latex')
 xlim([min(vGrid_kMultigrid),max(vGrid_kMultigrid)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_laborPolicy_1_multigrid&accelerator')
+savefig('q3_laborPolicy_1_multigridANDaccelerator')
 
 figure;
 mesh(kk, aa, mLaborPolicy_2');
@@ -1418,7 +1433,7 @@ ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 2 Labor','interpreter','latex')
 xlim([min(vGrid_kMultigrid),max(vGrid_kMultigrid)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_laborPolicy_2_multigrid&accelerator')
+savefig('q3_laborPolicy_2_multigridANDaccelerator')
 
 figure;
 mesh(kk, aa, mConsumptionPolicy_1');
@@ -1429,7 +1444,7 @@ ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 1 Consumption','interpreter','latex')
 xlim([min(vGrid_kMultigrid),max(vGrid_kMultigrid)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_consumptionPolicy_1_multigrid&accelerator')
+savefig('q3_consumptionPolicy_1_multigridANDaccelerator')
 
 figure;
 mesh(kk, aa, mConsumptionPolicy_2');
@@ -1440,4 +1455,4 @@ ylabel('Shocks $z_1$ $z_2$','interpreter','latex')
 zlabel('Good 2 Consumption','interpreter','latex')
 xlim([min(vGrid_kMultigrid),max(vGrid_kMultigrid)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
-savefig('q3_consumptionPolicy_2_multigrid&accelerator')
+savefig('q3_consumptionPolicy_2_multigridANDaccelerator')
