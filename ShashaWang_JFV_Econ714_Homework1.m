@@ -1225,7 +1225,7 @@ for i=1:length(kGridLength)
     opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
     % laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
 
-    tic
+%     tic
 
     % Finding value and policy functions numerically
     while iteration <= maxIter ...
