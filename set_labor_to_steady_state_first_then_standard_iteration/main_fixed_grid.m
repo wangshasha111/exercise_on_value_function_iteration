@@ -152,7 +152,7 @@ while iteration <= maxIter && mDifference(iteration) > tolerance
     mValue0         = mValue;
     
     if mod(iteration,10) == 2
-        fprintf(' Iteration: %2.0f, Sup diff: %2.6f\n', iteration-1, mDifference(iteration)); 
+        fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
     end
     
 %     inputs.valueFunction0 = mValue0;
@@ -178,6 +178,22 @@ save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborT
 %  Iteration: 121, Sup diff: 0.000001
 %  Iteration: 129, Sup diff: 0.000001
 % ¿˙ ± 829.203325 √Î°£
+
+% On lab computer
+%  Iteration:  1, Sup diff: 0.005169
+%  Iteration: 11, Sup diff: 0.000334
+%  Iteration: 21, Sup diff: 0.000173
+%  Iteration: 31, Sup diff: 0.000100
+%  Iteration: 41, Sup diff: 0.000060
+%  Iteration: 51, Sup diff: 0.000037
+%  Iteration: 61, Sup diff: 0.000023
+%  Iteration: 71, Sup diff: 0.000014
+%  Iteration: 81, Sup diff: 0.000009
+%  Iteration: 91, Sup diff: 0.000006
+%  Iteration: 101, Sup diff: 0.000004
+%  Iteration: 111, Sup diff: 0.000002
+%  Iteration: 121, Sup diff: 0.000001
+% Elapsed time is 472.848052 seconds.
 
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
 
@@ -248,7 +264,7 @@ while iteration <= maxIter && mDifference(iteration) > tolerance
     mValue0         = mValue;
     
 %     if mod(iteration,10) == 2
-        fprintf(' Iteration: %2.0f, Sup diff: %2.6f\n', iteration-1, mDifference(iteration)); 
+        fprintf(' Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
 %     end
     
 end
