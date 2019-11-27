@@ -400,6 +400,7 @@ ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
 savefig('q3_eulerEquationErrorLinearInterpolation_accelerator')
 
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_thenDoRealValueFunctionIteration_accelerator
+% lab computer
 
 %  Iteration:  1, Sup diff: 0.00128356
 %  Iteration: 11, Sup diff: 0.00061426
