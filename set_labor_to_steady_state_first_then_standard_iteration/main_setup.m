@@ -5,7 +5,7 @@
 close all;
 clear;
 
-cd 'E:\Dropbox\fall 19-20\jesus\homework_1\set_labor_to_steady_state_first_then_standard_iteration';
+% cd 'E:\Dropbox\fall 19-20\jesus\homework_1\set_labor_to_steady_state_first_then_standard_iteration';
 
 %% Calibration
 bbeta = 0.96;
