@@ -6,6 +6,15 @@ main_setup % parameters, shocks
 
 %% Value function iteration with ACCELERATOR
 
+% As in the fixed-grid problem, we also first set labor level to steady
+% state level and compute a converged value function, then use it as the
+% initial guess for the real and qualified value function iteration. 
+
+% I made the stupidiiest mistake: 
+% I meant to write labor_1_SteadyState,labor_2_SteadyState
+% but ended up writing labor_1_SteadyState,labor_1_SteadyState
+% So the value function didn't converge, and I was sooooo frustrated
+
 %% Step 1: Compute the Steady State
 
 % Initially I try to "fsolve" for labor_1 and then solve for the other two
@@ -121,7 +130,7 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
             for ik = 1:Nk
                 k = vGrid_k(ik);
 
-                if mod(iteration,10) == 1
+                if mod(iteration,10) ==1
 
                     if ik == 1
 
@@ -141,9 +150,10 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                     mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,labor_2_SteadyState);
 
                 else
-                    currentUtility = utilityFunction(mConsumptionPolicy_1(ik,ia),mConsumptionPolicy_2(ik,ia),labor_1_SteadyState,labor_1_SteadyState,mmu_1,mmu_2);;
+                    currentUtility = utilityFunction(mConsumptionPolicy_1(ik,ia),mConsumptionPolicy_2(ik,ia),labor_1_SteadyState,labor_2_SteadyState,mmu_1,mmu_2);;
                     expectedValue = interp1(vGrid_k,expectedValue0(:,ia),mKPolicy(ik,ia));
                     value = (1-bbeta)*currentUtility + bbeta * expectedValue;
+                    
                     mValue(ik,ia) = value;
                 end
             end
@@ -201,6 +211,23 @@ toc
 fprintf(' Convergence achieved. Total Number of Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
 
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_accelerator
+% lab computer
+%  Iteration:  1, Sup diff: 0.00516861
+%  Iteration: 11, Sup diff: 0.00067347
+%  Iteration: 21, Sup diff: 0.00018309
+%  Iteration: 31, Sup diff: 0.00011045
+%  Iteration: 41, Sup diff: 0.00010236
+%  Iteration: 51, Sup diff: 0.00006380
+%  Iteration: 61, Sup diff: 0.00001971
+%  Iteration: 71, Sup diff: 0.00001192
+%  Iteration: 81, Sup diff: 0.00000730
+%  Iteration: 91, Sup diff: 0.00000444
+%  Iteration: 101, Sup diff: 0.00000273
+%  Iteration: 111, Sup diff: 0.00000169
+%  Iteration: 121, Sup diff: 0.00000105
+%  Iteration: 123, Sup diff: 0.00000095
+% Elapsed time is 84.668544 seconds.
+%  Convergence achieved. Total Number of Iteration: 123, Sup diff: 0.00000095
 
 
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
@@ -348,6 +375,9 @@ end
 toc
 
 fprintf(' Convergence achieved. Total Number of Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
+
+
+
 
 %% For accuracy test, compute the euler equation error
 
