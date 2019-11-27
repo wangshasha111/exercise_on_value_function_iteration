@@ -401,6 +401,26 @@ savefig('q3_eulerEquationErrorLinearInterpolation_accelerator')
 
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_thenDoRealValueFunctionIteration_accelerator
 
+%  Iteration:  1, Sup diff: 0.00128356
+%  Iteration: 11, Sup diff: 0.00061426
+%  Iteration: 21, Sup diff: 0.00038861
+%  Iteration: 31, Sup diff: 0.00025225
+%  Iteration: 41, Sup diff: 0.00016538
+%  Iteration: 51, Sup diff: 0.00010888
+%  Iteration: 61, Sup diff: 0.00007183
+%  Iteration: 71, Sup diff: 0.00004744
+%  Iteration: 81, Sup diff: 0.00003137
+%  Iteration: 91, Sup diff: 0.00002075
+%  Iteration: 101, Sup diff: 0.00001374
+%  Iteration: 111, Sup diff: 0.00000910
+%  Iteration: 121, Sup diff: 0.00000603
+%  Iteration: 131, Sup diff: 0.00000400
+%  Iteration: 141, Sup diff: 0.00000265
+%  Iteration: 151, Sup diff: 0.00000176
+%  Iteration: 161, Sup diff: 0.00000117
+% Elapsed time is 2100.471542 seconds.
+%  Convergence achieved. Total Number of Iteration: 166, Sup diff: 0.00000095
+
 %% figures for Value Function Iteration with a Fixed Grid
 
 figure
