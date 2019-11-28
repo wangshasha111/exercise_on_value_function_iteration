@@ -1,4 +1,4 @@
-function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_stochasticGrid(kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL)
+function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_stochasticGrid(kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,laborInitial)
 
     global inputs;
     vGrid_a1 = inputs.vGrid_a1;
@@ -8,7 +8,7 @@ function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_sto
     vGrid_k = inputs.vGrid_k;
     % laborFunction = inputs.laborFunction;
 
-    laborInitial=[0.2,0.2];
+%     laborInitial=[0.2,0.2];
     opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
     vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
     labor_1 = vLabor(1);
@@ -40,7 +40,7 @@ function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_sto
 
     else
         consumption_1 = -1e10;
-        consumption_1 = -1e10;
+        consumption_2 = -1e10;
         value = -1e10;
     end
 end

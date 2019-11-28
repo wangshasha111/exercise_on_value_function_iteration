@@ -163,7 +163,6 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
             a_2 = mGrid_a1a2(ia,2);
             
             iikPrime = 1;
-%             normalizedExpectedValue0 = expectedValue0(:,ia)/vNormalizer(ia); % Nk by 1 colum vector
 
             for ik = 1:Nk
                 k = vGrid_k(ik);
@@ -178,9 +177,7 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                         kPrime = vGrid_k(ikPrime);
                         [valueProvisional,consumption_1,consumption_2] = valueFunction_stochasticGrid_setLaborToSteadyState...
                             (kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,labor_1_SteadyState,labor_2_SteadyState);
-%                         valueProvisional = outputValueFunction(1);
-%                         consumption_1 = outputValueFunction(2);
-%                         consumption_2 = outputValueFunction(3);
+
                         if (valueProvisional>valueHighSoFar)
                             valueHighSoFar = valueProvisional;
                             kChoice = vGrid_k(ikPrime);
@@ -229,9 +226,7 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                     kPrime = vGrid_k(ikPrime);
                     [valueProvisional,consumption_1,consumption_2] = valueFunction_stochasticGrid_setLaborToSteadyState...
                         (kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,labor_1_SteadyState,labor_2_SteadyState);
-%                     valueProvisional = outputValueFunction(1);
-%                     consumption_1 = outputValueFunction(2);
-%                     consumption_2 = outputValueFunction(3);
+
                     if (valueProvisional>valueHighSoFar)
                         valueHighSoFar = valueProvisional;
                         kChoice = vGrid_k(ikPrime);
@@ -311,67 +306,6 @@ save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteratio
 %  Convergence achieved. Total Number of Iteration: 156, Sup diff: 0.00000092
  
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
-% 
-% % Because we are now using grid search, it's reasonable to use efficiency
-% % matrix since we don't need to do interpolation
-% 
-% % Logic: 
-% % Because fsolve takes a long time in iteration to solve for labor_1,
-% % labor_2, I create the matrices for them as well as for consumption_1 and
-% % consumption_2 to retrieve from later.
-% 
-% 
-% mLabor_1Fsolve = zeros(Nk,Nk,Na); % kPrime,k,[a_1,a_2]
-% mLabor_2Fsolve = zeros(Nk,Nk,Na);
-% mConsumption_1Fsolve = zeros(Nk,Nk,Na);
-% mConsumption_2Fsolve = zeros(Nk,Nk,Na);
-% mCurrentUtilityFsolve = zeros(Nk,Nk,Na);
-% laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
-% opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
-% 
-% tic
-% for ia = 1:Na
-%     a_1 = mGrid_a1a2(ia,1);
-%     a_2 = mGrid_a1a2(ia,2);
-%     
-%     for ik = 1:Nk
-%         k = vGrid_k(ik);
-%         
-%         for ikPrime = ikStochasticGrid
-%             kPrime = vGrid_k(ikPrime);
-%             
-%             vLaborFsolve = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-% 
-%             mLabor_1Fsolve(ikPrime,ik,ia) = vLaborFsolve(1);
-%             mLabor_2Fsolve(ikPrime,ik,ia) = vLaborFsolve(2);
-%             mConsumption_1Fsolve(ikPrime,ik,ia) = consumptionFunction1(a_1,k,kPrime,vLaborFsolve(1),aalphaK,aalphaL,ddelta);
-%             mConsumption_2Fsolve(ikPrime,ik,ia) = consumptionFunction2(a_2,vLaborFsolve(2));
-%             mCurrentUtilityFsolve(ikPrime,ik,ia) = utilityFunction(mConsumption_1Fsolve(ikPrime,ik,ia),mConsumption_2Fsolve(ikPrime,ik,ia),vLaborFsolve(1),vLaborFsolve(2),mmu_1,mmu_2);
-% %             mMarginalUtilityTodayFsolve(ikPrime,ia,ik) = mmu_1 * (mConsumption_2Fsolve(ikPrime,ia,ik))^mmu_2 * (mConsumption_1Fsolve(ikPrime,ia,ik))^(mmu_1-1);
-% %             laborInitial=[vLaborFsolve(1),vLaborFsolve(2)];
-%         end
-%         
-%     end
-% end
-% toc
-% 
-% inputs.mLabor_1Fsolve = mLabor_1Fsolve;
-% inputs.mLabor_2Fsolve = mLabor_2Fsolve;
-% inputs.mConsumption_1Fsolve = mConsumption_1Fsolve;
-% inputs.mConsumption_2Fsolve = mConsumption_2Fsolve;
-% inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
-% % inputs.mMarginalUtilityTodayFsolve = mMarginalUtilityTodayFsolve;
-% % 
-% % mLabor_1Fsolve=permute(mLabor_1Fsolve,[3,2,1]);
-% % mLabor_2Fsolve=permute(mLabor_2Fsolve,[3,2,1]);
-% % mConsumption_1Fsolve=permute(mConsumption_1Fsolve,[3,2,1]);
-% % mConsumption_2Fsolve=permute(mConsumption_2Fsolve,[3,2,1]);
-% % mCurrentUtilityFsolve=permute(mCurrentUtilityFsolve,[3,2,1]);
-% 
-% save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve')
-% % ¿˙ ± 2516.447092 √Î°£
-
-
 
 
 %% Required matrices and vectors
@@ -393,7 +327,7 @@ mDifference(iteration) = 100;
 
 options = optimset('Display', 'off');
 opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
-% laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
+laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
 
 tic
 
@@ -424,16 +358,13 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                         kPrime = vGrid_k(ikPrime);
 
                         [valueProvisional,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_stochasticGrid...
-                            (kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL);
-%                         laborInitial = [labor_1,labor_2];
-%                         valueProvisional = outputValueFunction(1);
-%                         consumption_1 = outputValueFunction(2);
-%                         consumption_2 = outputValueFunction(3);
+                            (kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,laborInitial);
 
                         if (valueProvisional>valueHighSoFar)
                             valueHighSoFar = valueProvisional;
                             kChoice = vGrid_k(ikPrime);
                             iikPrime = sum(ikPrime >= ikStochasticGrid);
+%                             laborInitial = [labor_1,labor_2];
                         else
                             break
                         end
@@ -445,29 +376,8 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                     mLaborPolicy_2(ik,ia) = labor_2;
                     mConsumptionPolicy_1(ik,ia) = consumption_1;
                     mConsumptionPolicy_2(ik,ia) = consumption_2;
-                    
-%                     if ik == 1
-%                         [kPrime, vAux] = fminbnd(@(kPrime) ...
-%                             -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-%                             vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
-% 
-%                     else
-%                         [kPrime, vAux] = fminbnd(@(kPrime) ...
-%                             -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-%                             mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
-%                     end
-% 
-%                     mKPolicy(ik,ia) = kPrime;
-%                     mValue(ik,ia) = -vAux;           
-% 
-%                     vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-%                     mLaborPolicy_1(ik,ia) = vLabor(1);
-%                     mLaborPolicy_2(ik,ia) = vLabor(2);
-%                     mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
-%                     mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
-%                     laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
+ 
                 else
-%                     currentUtility = interp1(vGrid_k,mCurrentUtilityFsolve(:,ia,ik),mKPolicy(ik,ia));
                     currentUtility = utilityFunction(mConsumptionPolicy_1(ik,ia),mConsumptionPolicy_2(ik,ia),mLaborPolicy_1(ik,ia),mLaborPolicy_2(ik,ia),mmu_1,mmu_2);
                     expectedValue = expectedValue0(sum(mKPolicy(ik,ia)>=vGrid_k),ia);
                     value = (1-bbeta)*currentUtility + bbeta * expectedValue;
@@ -499,20 +409,21 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
 %                 if mod(iteration,10) == 1
                     valueHighSoFar = -1000.0;
                     kChoice  = vGrid_k(1);
+%                     laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
             
                     for ikPrime = ikStochasticGrid(iikPrime:end)
                         kPrime = vGrid_k(ikPrime);
                         
-                        laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
 
                         [valueProvisional,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_stochasticGrid...
                             (kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,laborInitial);
-                        laborInitial = [labor_1,labor_2];
+                        
 
                         if (valueProvisional>valueHighSoFar)
                             valueHighSoFar = valueProvisional;
                             kChoice = vGrid_k(ikPrime);
                             iikPrime = sum(ikPrime >= ikStochasticGrid);
+%                             laborInitial = [labor_1,labor_2];
                         else
                             break
                         end
@@ -524,36 +435,7 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                     mLaborPolicy_2(ik,ia) = labor_2;
                     mConsumptionPolicy_1(ik,ia) = consumption_1;
                     mConsumptionPolicy_2(ik,ia) = consumption_2;
-                    
-%                     if ik == 1
-%                         [kPrime, vAux] = fminbnd(@(kPrime) ...
-%                             -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-%                             vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
-% 
-%                     else
-%                         [kPrime, vAux] = fminbnd(@(kPrime) ...
-%                             -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-%                             mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
-%                     end
-% 
-%                     mKPolicy(ik,ia) = kPrime;
-%                     mValue(ik,ia) = -vAux;           
-% 
-%                     vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-%                     mLaborPolicy_1(ik,ia) = vLabor(1);
-%                     mLaborPolicy_2(ik,ia) = vLabor(2);
-%                     mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
-%                     mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
-%                     laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
-%                 else
-%                     currentUtility = interp1(vGrid_k,mCurrentUtilityFsolve(:,ia,ik),mKPolicy(ik,ia));
-%                     currentUtility = utilityFunction(mConsumptionPolicy_1(ik,ia),mConsumptionPolicy_2(ik,ia),mLaborPolicy_1(ik,ia),mLaborPolicy_2(ik,ia),mmu_1,mmu_2);
-%                     expectedValue = expectedValue0(sum(mKPolicy(ik,ia)>=vGrid_k),ia);
-%                     value = (1-bbeta)*currentUtility + bbeta * expectedValue;
-%                     
-%                     mValue(ik,ia) = value;
-%                     
-%                 end
+
             end
         end
         iteration = iteration + 1;
@@ -568,11 +450,7 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
             break
         end
     end
-%         iteration = iteration + 1;
-%         mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
-%         mValue0         = mValue;
-% 
-%         fprintf(' Iteration: %2.0f, Sup diff: %2.6f\n', iteration-1, mDifference(iteration)); 
+
 
 end
 
@@ -603,26 +481,6 @@ ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
 savefig('q3_eulerEquationErrorLinearInterpolation_accelerator')
 
 save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_thenDoRealValueFunctionIteration_accelerator
-
-%  Iteration:  1, Sup diff: 0.00128356
-%  Iteration: 11, Sup diff: 0.00061426
-%  Iteration: 21, Sup diff: 0.00038861
-%  Iteration: 31, Sup diff: 0.00025225
-%  Iteration: 41, Sup diff: 0.00016538
-%  Iteration: 51, Sup diff: 0.00010888
-%  Iteration: 61, Sup diff: 0.00007183
-%  Iteration: 71, Sup diff: 0.00004744
-%  Iteration: 81, Sup diff: 0.00003137
-%  Iteration: 91, Sup diff: 0.00002075
-%  Iteration: 101, Sup diff: 0.00001374
-%  Iteration: 111, Sup diff: 0.00000910
-%  Iteration: 121, Sup diff: 0.00000603
-%  Iteration: 131, Sup diff: 0.00000400
-%  Iteration: 141, Sup diff: 0.00000265
-%  Iteration: 151, Sup diff: 0.00000176
-%  Iteration: 161, Sup diff: 0.00000117
-% Elapsed time is 2100.471542 seconds.
-%  Convergence achieved. Total Number of Iteration: 166, Sup diff: 0.00000095
 
 %% figures for Value Function Iteration with a Fixed Grid
 
