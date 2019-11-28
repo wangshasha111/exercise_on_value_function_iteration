@@ -13,9 +13,12 @@ function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_sto
     vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
     labor_1 = vLabor(1);
     labor_2 = vLabor(2);
-    consumption_1 = consumptionFunction1(a_1,k,kPrime,labor_1,aalphaK,aalphaL,ddelta);
-    consumption_2 = consumptionFunction2(a_2,labor_2);
-    currentUtility = utilityFunction(consumption_1,consumption_2,labor_1,labor_2,mmu_1,mmu_2);
+    
+    if isreal(vLabor)==1
+
+    	consumption_1 = consumptionFunction1(a_1,k,kPrime,labor_1,aalphaK,aalphaL,ddelta);
+    	consumption_2 = consumptionFunction2(a_2,labor_2);
+    	currentUtility = utilityFunction(consumption_1,consumption_2,labor_1,labor_2,mmu_1,mmu_2);
 
     % find the index of kPrime, a1, a2, k
 %     ikPrimeLow  = max(sum(kPrime > vGrid_k),1);
@@ -24,17 +27,20 @@ function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_sto
 %     ia_2 = sum(a_2 >= vGrid_a2);
     % ik = sum(k >= vGrid_k);
 
-    if (consumption_1 >= 0) && (labor_1 >= 0) && (consumption_2 >= 0) && (labor_2 >= 0) ...
-            && isreal(labor_1)==1 && isreal(labor_2)==1 && isreal(consumption_1)==1 && isreal(consumption_2)==1
+%    if (consumption_1 >= 0) && (labor_1 >= 0) && (consumption_2 >= 0) && (labor_2 >= 0) ...
+%            && isreal(labor_1)==1 && isreal(labor_2)==1 && isreal(consumption_1)==1 && isreal(consumption_2)==1
 %         expectedValue  = expectedValue0(ikPrimeLow,ia) + ...
 %             (expectedValue0(ikPrimeHigh,ia) - expectedValue0(ikPrimeLow,ia))./...
 %             (vGrid_k(ikPrimeHigh) - vGrid_k(ikPrimeLow)).*(kPrime - vGrid_k(ikPrimeLow));
 %         expectedValue = interp1(vGrid_k,expectedValue0(:,ia),kPrime);
+
         expectedValue = expectedValue0(ikPrime,ia);
 
         value = (1-bbeta)*currentUtility + bbeta * expectedValue;
 
     else
+        consumption_1 = -1e10;
+        consumption_1 = -1e10;
         value = -1e10;
     end
 end

@@ -289,6 +289,27 @@ save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteratio
 % ¿˙ ± 24.143055 √Î°£
 %  Convergence achieved. Total Number of Iteration: 155, Sup diff: 0.00000095
 
+% Lab computer thanksgiving day 11/28/2019 4:34pm
+%  Iteration:  1, Sup diff: 0.00442837
+%  Iteration: 11, Sup diff: 0.00046245
+%  Iteration: 21, Sup diff: 0.00030112
+%  Iteration: 31, Sup diff: 0.00019410
+%  Iteration: 41, Sup diff: 0.00012641
+%  Iteration: 51, Sup diff: 0.00008234
+%  Iteration: 61, Sup diff: 0.00005365
+%  Iteration: 71, Sup diff: 0.00003496
+%  Iteration: 81, Sup diff: 0.00002279
+%  Iteration: 91, Sup diff: 0.00001485
+%  Iteration: 101, Sup diff: 0.00000969
+%  Iteration: 111, Sup diff: 0.00000632
+%  Iteration: 121, Sup diff: 0.00000412
+%  Iteration: 131, Sup diff: 0.00000269
+%  Iteration: 141, Sup diff: 0.00000175
+%  Iteration: 151, Sup diff: 0.00000114
+%  Iteration: 156, Sup diff: 0.00000092
+% Elapsed time is 13.969091 seconds.
+%  Convergence achieved. Total Number of Iteration: 156, Sup diff: 0.00000092
+ 
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
 % 
 % % Because we are now using grid search, it's reasonable to use efficiency
@@ -393,7 +414,8 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
             for ik = 1:Nk
                 k = vGrid_k(ik);
                 
-                if mod(iteration,10) == 1 % do maximization
+%                 if mod(iteration,10) == 1 % do maximization
+                if mod(iteration,10) >= 0 % do maximization
                     valueHighSoFar = -1000.0;
                     kChoice  = vGrid_k(1);
 %                     laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
@@ -486,9 +508,6 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                         [valueProvisional,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_stochasticGrid...
                             (kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,laborInitial);
                         laborInitial = [labor_1,labor_2];
-%                         valueProvisional = outputValueFunction(1);
-%                         consumption_1 = outputValueFunction(2);
-%                         consumption_2 = outputValueFunction(3);
 
                         if (valueProvisional>valueHighSoFar)
                             valueHighSoFar = valueProvisional;
