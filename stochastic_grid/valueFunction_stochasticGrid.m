@@ -1,4 +1,4 @@
-function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL)
+function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction_stochasticGrid(kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL)
 
     global inputs;
     vGrid_a1 = inputs.vGrid_a1;
@@ -24,11 +24,13 @@ function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction(kPr
 %     ia_2 = sum(a_2 >= vGrid_a2);
     % ik = sum(k >= vGrid_k);
 
-    if (consumption_1 >= 0) && (labor_1 >= 0) && (consumption_2 >= 0) && (labor_2 >= 0) 
+    if (consumption_1 >= 0) && (labor_1 >= 0) && (consumption_2 >= 0) && (labor_2 >= 0) ...
+            && isreal(labor_1)==1 && isreal(labor_2)==1 && isreal(consumption_1)==1 && isreal(consumption_2)==1
 %         expectedValue  = expectedValue0(ikPrimeLow,ia) + ...
 %             (expectedValue0(ikPrimeHigh,ia) - expectedValue0(ikPrimeLow,ia))./...
 %             (vGrid_k(ikPrimeHigh) - vGrid_k(ikPrimeLow)).*(kPrime - vGrid_k(ikPrimeLow));
-        expectedValue = interp1(vGrid_k,expectedValue0(:,ia),kPrime);
+%         expectedValue = interp1(vGrid_k,expectedValue0(:,ia),kPrime);
+        expectedValue = expectedValue0(ikPrime,ia);
 
         value = (1-bbeta)*currentUtility + bbeta * expectedValue;
 

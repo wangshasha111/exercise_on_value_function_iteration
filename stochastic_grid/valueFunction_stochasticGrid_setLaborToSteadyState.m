@@ -1,4 +1,4 @@
-function [value,consumption_1,consumption_2] = valueFunction_stochasticGrid_setLaborToSteadyState(kPrime,ikPrime,ik,k,ia,a_1,a_2,normalizedExpectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,labor_1_SteadyState,labor_2_SteadyState)
+function [value,consumption_1,consumption_2] = valueFunction_stochasticGrid_setLaborToSteadyState(kPrime,ikPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL,labor_1_SteadyState,labor_2_SteadyState)
 
     global inputs;
     vGrid_a1 = inputs.vGrid_a1;
@@ -36,7 +36,7 @@ function [value,consumption_1,consumption_2] = valueFunction_stochasticGrid_setL
     %         (vGrid_k(ikPrimeHigh) - vGrid_k(ikPrimeLow)).*(kPrime - vGrid_k(ikPrimeLow));
     
 %         expectedValue = interp1(vGrid_k,expectedValue0(:,ia),kPrime);
-        expectedValue = normalizedExpectedValue0(ikPrime);
+        expectedValue = expectedValue0(ikPrime,ia);
 
         value = (1-bbeta)*currentUtility + bbeta * expectedValue;
 

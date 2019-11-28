@@ -50,8 +50,6 @@
 % fminsearch/con/bnd. 
 % Because we are doing grid search, CONCAVITY of value function and
 % MONOTONICITY of policy function can be utilized to speed up the process.
-% NOTE: we also have to deal with COMPLEX solutions for fsolve when we use
-% grid search
 
 % ==============================================================
 
@@ -108,7 +106,7 @@ inputs.vGrid_k = vGrid_k;
 % That means the other dimension also needs to be fixed. 
 % So we are going to take draws from different level of capital as well as from different shocks.
 
-NkDraws = ceil(Nk/50);
+NkDraws = ceil(Nk/4);
 seedKDraws=rng;
 rng(seedKDraws);
 ikStochasticGrid = randperm(Nk,NkDraws);%a ROW vector containing numberOfDraws unique integers selected randomly from 1 to Nk inclusive.
@@ -290,65 +288,65 @@ save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteratio
 %  Convergence achieved. Total Number of Iteration: 155, Sup diff: 0.00000095
 
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
+
+% Because we are now using grid search, it's reasonable to use efficiency
+% matrix since we don't need to do interpolation
+
+% Logic: 
+% Because fsolve takes a long time in iteration to solve for labor_1,
+% labor_2, I create the matrices for them as well as for consumption_1 and
+% consumption_2 to retrieve from later.
+
+
+mLabor_1Fsolve = zeros(NkDraws,Nk,Na); % kPrime,k,[a_1,a_2]
+mLabor_2Fsolve = zeros(NkDraws,Nk,Na);
+mConsumption_1Fsolve = zeros(NkDraws,Nk,Na);
+mConsumption_2Fsolve = zeros(NkDraws,Nk,Na);
+mCurrentUtilityFsolve = zeros(NkDraws,Nk,Na);
+laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
+opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
+
+tic
+for ia = 1:Na
+    a_1 = mGrid_a1a2(ia,1);
+    a_2 = mGrid_a1a2(ia,2);
+    
+    for ik = 1:Nk
+        k = vGrid_k(ik);
+        
+        for ikPrime = ikStochasticGrid
+            kPrime = vGrid_k(ikPrime);
+            
+            vLaborFsolve = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+
+            mLabor_1Fsolve(ikPrime,ik,ia) = vLaborFsolve(1);
+            mLabor_2Fsolve(ikPrime,ik,ia) = vLaborFsolve(2);
+            mConsumption_1Fsolve(ikPrime,ik,ia) = consumptionFunction1(a_1,k,kPrime,vLaborFsolve(1),aalphaK,aalphaL,ddelta);
+            mConsumption_2Fsolve(ikPrime,ik,ia) = consumptionFunction2(a_2,vLaborFsolve(2));
+            mCurrentUtilityFsolve(ikPrime,ik,ia) = utilityFunction(mConsumption_1Fsolve(ikPrime,ik,ia),mConsumption_2Fsolve(ikPrime,ik,ia),vLaborFsolve(1),vLaborFsolve(2),mmu_1,mmu_2);
+%             mMarginalUtilityTodayFsolve(ikPrime,ia,ik) = mmu_1 * (mConsumption_2Fsolve(ikPrime,ia,ik))^mmu_2 * (mConsumption_1Fsolve(ikPrime,ia,ik))^(mmu_1-1);
+            laborInitial=[vLaborFsolve(1),vLaborFsolve(2)];
+        end
+        
+    end
+end
+toc
+
+inputs.mLabor_1Fsolve = mLabor_1Fsolve;
+inputs.mLabor_2Fsolve = mLabor_2Fsolve;
+inputs.mConsumption_1Fsolve = mConsumption_1Fsolve;
+inputs.mConsumption_2Fsolve = mConsumption_2Fsolve;
+inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
+% inputs.mMarginalUtilityTodayFsolve = mMarginalUtilityTodayFsolve;
 % 
-% % Because we are now using grid search, it's reasonable to use efficiency
-% % matrix since we don't need to do interpolation
-% 
-% % Logic: 
-% % Because fsolve takes a long time in iteration to solve for labor_1,
-% % labor_2, I create the matrices for them as well as for consumption_1 and
-% % consumption_2 to retrieve from later.
-% 
-% 
-% mLabor_1Fsolve = zeros(Nk,Nk,Na); % kPrime,k,[a_1,a_2]
-% mLabor_2Fsolve = zeros(Nk,Nk,Na);
-% mConsumption_1Fsolve = zeros(Nk,Nk,Na);
-% mConsumption_2Fsolve = zeros(Nk,Nk,Na);
-% mCurrentUtilityFsolve = zeros(Nk,Nk,Na);
-% laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
-% opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
-% 
-% tic
-% for ia = 1:Na
-%     a_1 = mGrid_a1a2(ia,1);
-%     a_2 = mGrid_a1a2(ia,2);
-%     
-%     for ik = 1:Nk
-%         k = vGrid_k(ik);
-%         
-%         for ikPrime = ikStochasticGrid
-%             kPrime = vGrid_k(ikPrime);
-%             
-%             vLaborFsolve = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-% 
-%             mLabor_1Fsolve(ikPrime,ik,ia) = vLaborFsolve(1);
-%             mLabor_2Fsolve(ikPrime,ik,ia) = vLaborFsolve(2);
-%             mConsumption_1Fsolve(ikPrime,ik,ia) = consumptionFunction1(a_1,k,kPrime,vLaborFsolve(1),aalphaK,aalphaL,ddelta);
-%             mConsumption_2Fsolve(ikPrime,ik,ia) = consumptionFunction2(a_2,vLaborFsolve(2));
-%             mCurrentUtilityFsolve(ikPrime,ik,ia) = utilityFunction(mConsumption_1Fsolve(ikPrime,ik,ia),mConsumption_2Fsolve(ikPrime,ik,ia),vLaborFsolve(1),vLaborFsolve(2),mmu_1,mmu_2);
-% %             mMarginalUtilityTodayFsolve(ikPrime,ia,ik) = mmu_1 * (mConsumption_2Fsolve(ikPrime,ia,ik))^mmu_2 * (mConsumption_1Fsolve(ikPrime,ia,ik))^(mmu_1-1);
-% %             laborInitial=[vLaborFsolve(1),vLaborFsolve(2)];
-%         end
-%         
-%     end
-% end
-% toc
-% 
-% inputs.mLabor_1Fsolve = mLabor_1Fsolve;
-% inputs.mLabor_2Fsolve = mLabor_2Fsolve;
-% inputs.mConsumption_1Fsolve = mConsumption_1Fsolve;
-% inputs.mConsumption_2Fsolve = mConsumption_2Fsolve;
-% inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
-% % inputs.mMarginalUtilityTodayFsolve = mMarginalUtilityTodayFsolve;
-% % 
-% % mLabor_1Fsolve=permute(mLabor_1Fsolve,[3,2,1]);
-% % mLabor_2Fsolve=permute(mLabor_2Fsolve,[3,2,1]);
-% % mConsumption_1Fsolve=permute(mConsumption_1Fsolve,[3,2,1]);
-% % mConsumption_2Fsolve=permute(mConsumption_2Fsolve,[3,2,1]);
-% % mCurrentUtilityFsolve=permute(mCurrentUtilityFsolve,[3,2,1]);
-% 
-% save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve')
-% % 历时 2516.447092 秒。
+% mLabor_1Fsolve=permute(mLabor_1Fsolve,[3,2,1]);
+% mLabor_2Fsolve=permute(mLabor_2Fsolve,[3,2,1]);
+% mConsumption_1Fsolve=permute(mConsumption_1Fsolve,[3,2,1]);
+% mConsumption_2Fsolve=permute(mConsumption_2Fsolve,[3,2,1]);
+% mCurrentUtilityFsolve=permute(mCurrentUtilityFsolve,[3,2,1]);
+
+save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve')
+% 历时 2516.447092 秒。
 
 
 
