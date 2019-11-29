@@ -1,6 +1,7 @@
 % Homework 1 Econ714 JFV
 % A two good production economy
 % Written by Shasha Wang
+% Stochastic grid scheme 
 % Reference: Rust 1997
 
 % Implement a stochastic grid scheme (Rust, 1997) for a Value function iteration,
