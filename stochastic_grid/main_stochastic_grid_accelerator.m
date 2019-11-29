@@ -108,7 +108,7 @@ inputs.vGrid_k = vGrid_k;
 % That means the other dimension also needs to be fixed. 
 % So we are going to take draws from different level of capital as well as from different shocks.
 
-NkDraws = ceil(Nk/50);
+NkDraws = ceil(Nk/100);
 seedKDraws=rng;
 rng(seedKDraws);
 ikStochasticGrid = randperm(Nk,NkDraws);%a ROW vector containing numberOfDraws unique integers selected randomly from 1 to Nk inclusive.
@@ -305,6 +305,26 @@ save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteratio
 % Elapsed time is 13.969091 seconds.
 %  Convergence achieved. Total Number of Iteration: 156, Sup diff: 0.00000092
  
+% 5 draws of capital
+%  Iteration:  1, Sup diff: 0.00417316
+%  Iteration: 11, Sup diff: 0.00032735
+%  Iteration: 21, Sup diff: 0.00018324
+%  Iteration: 31, Sup diff: 0.00011859
+%  Iteration: 41, Sup diff: 0.00007828
+%  Iteration: 51, Sup diff: 0.00005167
+%  Iteration: 61, Sup diff: 0.00003409
+%  Iteration: 71, Sup diff: 0.00002250
+%  Iteration: 81, Sup diff: 0.00001484
+%  Iteration: 91, Sup diff: 0.00000979
+%  Iteration: 101, Sup diff: 0.00000646
+%  Iteration: 111, Sup diff: 0.00000426
+%  Iteration: 121, Sup diff: 0.00000281
+%  Iteration: 131, Sup diff: 0.00000185
+%  Iteration: 141, Sup diff: 0.00000122
+%  Iteration: 147, Sup diff: 0.00000095
+% Elapsed time is 12.511260 seconds.
+%  Convergence achieved. Total Number of Iteration: 147, Sup diff: 0.00000095
+
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
 
 
@@ -365,17 +385,18 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                             kChoice = vGrid_k(ikPrime);
                             iikPrime = sum(ikPrime >= ikStochasticGrid);
 %                             laborInitial = [labor_1,labor_2];
+                            mValue(ik,ia) = valueHighSoFar;
+                            mKPolicy(ik,ia) = kChoice;
+                            mLaborPolicy_1(ik,ia) = labor_1;
+                            mLaborPolicy_2(ik,ia) = labor_2;
+                            mConsumptionPolicy_1(ik,ia) = consumption_1;
+                            mConsumptionPolicy_2(ik,ia) = consumption_2;
                         else
                             break
                         end
                     end
                
-                    mValue(ik,ia) = valueHighSoFar;
-                    mKPolicy(ik,ia) = kChoice;
-                    mLaborPolicy_1(ik,ia) = labor_1;
-                    mLaborPolicy_2(ik,ia) = labor_2;
-                    mConsumptionPolicy_1(ik,ia) = consumption_1;
-                    mConsumptionPolicy_2(ik,ia) = consumption_2;
+
  
                 else
                     currentUtility = utilityFunction(mConsumptionPolicy_1(ik,ia),mConsumptionPolicy_2(ik,ia),mLaborPolicy_1(ik,ia),mLaborPolicy_2(ik,ia),mmu_1,mmu_2);
@@ -424,6 +445,12 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
                             kChoice = vGrid_k(ikPrime);
                             iikPrime = sum(ikPrime >= ikStochasticGrid);
 %                             laborInitial = [labor_1,labor_2];
+                            mValue(ik,ia) = valueHighSoFar;
+                            mKPolicy(ik,ia) = kChoice;
+                            mLaborPolicy_1(ik,ia) = labor_1;
+                            mLaborPolicy_2(ik,ia) = labor_2;
+                            mConsumptionPolicy_1(ik,ia) = consumption_1;
+                            mConsumptionPolicy_2(ik,ia) = consumption_2;
                         else
                             break
                         end
@@ -458,6 +485,7 @@ toc
 
 fprintf(' Convergence achieved. Total Number of Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
 
+save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_thenDoRealValueFunctionIteration_accelerator
 
 
 %% For accuracy test, compute the euler equation error
@@ -480,7 +508,177 @@ xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
 savefig('q3_eulerEquationErrorLinearInterpolation_accelerator')
 
-save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_thenDoRealValueFunctionIteration_accelerator
+
+% Lab computer Thanksgiving day 11.28.2019 8:53pm
+%  Iteration:  1, Sup diff: 0.00156838
+%  Iteration:  2, Sup diff: 0.00119851
+%  Iteration:  3, Sup diff: 0.00082321
+%  Iteration:  4, Sup diff: 0.00078964
+%  Iteration:  5, Sup diff: 0.00075744
+%  Iteration:  6, Sup diff: 0.00072656
+%  Iteration:  7, Sup diff: 0.00069694
+%  Iteration:  8, Sup diff: 0.00066854
+%  Iteration:  9, Sup diff: 0.00064129
+%  Iteration: 10, Sup diff: 0.00061515
+%  Iteration: 11, Sup diff: 0.00059008
+%  Iteration: 12, Sup diff: 0.00056604
+%  Iteration: 13, Sup diff: 0.00054297
+%  Iteration: 14, Sup diff: 0.00052085
+%  Iteration: 15, Sup diff: 0.00049962
+%  Iteration: 16, Sup diff: 0.00047927
+%  Iteration: 17, Sup diff: 0.00045974
+%  Iteration: 18, Sup diff: 0.00044101
+%  Iteration: 19, Sup diff: 0.00042304
+%  Iteration: 20, Sup diff: 0.00040581
+%  Iteration: 21, Sup diff: 0.00038928
+%  Iteration: 22, Sup diff: 0.00037342
+%  Iteration: 23, Sup diff: 0.00035821
+%  Iteration: 24, Sup diff: 0.00034361
+%  Iteration: 25, Sup diff: 0.00032962
+%  Iteration: 26, Sup diff: 0.00031619
+%  Iteration: 27, Sup diff: 0.00030331
+%  Iteration: 28, Sup diff: 0.00029096
+%  Iteration: 29, Sup diff: 0.00027911
+%  Iteration: 30, Sup diff: 0.00026774
+%  Iteration: 31, Sup diff: 0.00025684
+%  Iteration: 32, Sup diff: 0.00024638
+%  Iteration: 33, Sup diff: 0.00023635
+%  Iteration: 34, Sup diff: 0.00022672
+%  Iteration: 35, Sup diff: 0.00021749
+%  Iteration: 36, Sup diff: 0.00020864
+%  Iteration: 37, Sup diff: 0.00020014
+%  Iteration: 38, Sup diff: 0.00019200
+%  Iteration: 39, Sup diff: 0.00018418
+%  Iteration: 40, Sup diff: 0.00017668
+%  Iteration: 41, Sup diff: 0.00016949
+%  Iteration: 42, Sup diff: 0.00016259
+%  Iteration: 43, Sup diff: 0.00015598
+%  Iteration: 44, Sup diff: 0.00014963
+%  Iteration: 45, Sup diff: 0.00014354
+%  Iteration: 46, Sup diff: 0.00013770
+%  Iteration: 47, Sup diff: 0.00013210
+%  Iteration: 48, Sup diff: 0.00012672
+%  Iteration: 49, Sup diff: 0.00012157
+%  Iteration: 50, Sup diff: 0.00011662
+%  Iteration: 51, Sup diff: 0.00011188
+%  Iteration: 52, Sup diff: 0.00010733
+%  Iteration: 53, Sup diff: 0.00010296
+%  Iteration: 54, Sup diff: 0.00009877
+%  Iteration: 55, Sup diff: 0.00009476
+%  Iteration: 56, Sup diff: 0.00009090
+%  Iteration: 57, Sup diff: 0.00008721
+%  Iteration: 58, Sup diff: 0.00008366
+%  Iteration: 59, Sup diff: 0.00008026
+%  Iteration: 60, Sup diff: 0.00007700
+%  Iteration: 61, Sup diff: 0.00007387
+%  Iteration: 62, Sup diff: 0.00007086
+%  Iteration: 63, Sup diff: 0.00006798
+%  Iteration: 64, Sup diff: 0.00006522
+%  Iteration: 65, Sup diff: 0.00006257
+%  Iteration: 66, Sup diff: 0.00006003
+%  Iteration: 67, Sup diff: 0.00005759
+%  Iteration: 68, Sup diff: 0.00005525
+%  Iteration: 69, Sup diff: 0.00005300
+%  Iteration: 70, Sup diff: 0.00005085
+%  Iteration: 71, Sup diff: 0.00004879
+%  Iteration: 72, Sup diff: 0.00004680
+%  Iteration: 73, Sup diff: 0.00004490
+%  Iteration: 74, Sup diff: 0.00004308
+%  Iteration: 75, Sup diff: 0.00004133
+%  Iteration: 76, Sup diff: 0.00003965
+%  Iteration: 77, Sup diff: 0.00003804
+%  Iteration: 78, Sup diff: 0.00003650
+%  Iteration: 79, Sup diff: 0.00003502
+%  Iteration: 80, Sup diff: 0.00003359
+%  Iteration: 81, Sup diff: 0.00003223
+%  Iteration: 82, Sup diff: 0.00003092
+%  Iteration: 83, Sup diff: 0.00002967
+%  Iteration: 84, Sup diff: 0.00002846
+%  Iteration: 85, Sup diff: 0.00002731
+%  Iteration: 86, Sup diff: 0.00002620
+%  Iteration: 87, Sup diff: 0.00002514
+%  Iteration: 88, Sup diff: 0.00002412
+%  Iteration: 89, Sup diff: 0.00002314
+%  Iteration: 90, Sup diff: 0.00002220
+%  Iteration: 91, Sup diff: 0.00002130
+%  Iteration: 92, Sup diff: 0.00002044
+%  Iteration: 93, Sup diff: 0.00001961
+%  Iteration: 94, Sup diff: 0.00001881
+%  Iteration: 95, Sup diff: 0.00001805
+%  Iteration: 96, Sup diff: 0.00001732
+%  Iteration: 97, Sup diff: 0.00001662
+%  Iteration: 98, Sup diff: 0.00001594
+%  Iteration: 99, Sup diff: 0.00001530
+%  Iteration: 100, Sup diff: 0.00001468
+%  Iteration: 101, Sup diff: 0.00001408
+%  Iteration: 102, Sup diff: 0.00001351
+%  Iteration: 103, Sup diff: 0.00001296
+%  Iteration: 104, Sup diff: 0.00001244
+%  Iteration: 105, Sup diff: 0.00001193
+%  Iteration: 106, Sup diff: 0.00001145
+%  Iteration: 107, Sup diff: 0.00001099
+%  Iteration: 108, Sup diff: 0.00001054
+%  Iteration: 109, Sup diff: 0.00001011
+%  Iteration: 110, Sup diff: 0.00000971
+%  Iteration: 111, Sup diff: 0.00000931
+%  Iteration: 112, Sup diff: 0.00000893
+%  Iteration: 113, Sup diff: 0.00000857
+%  Iteration: 114, Sup diff: 0.00000823
+%  Iteration: 115, Sup diff: 0.00000789
+%  Iteration: 116, Sup diff: 0.00000757
+%  Iteration: 117, Sup diff: 0.00000727
+%  Iteration: 118, Sup diff: 0.00000697
+%  Iteration: 119, Sup diff: 0.00000669
+%  Iteration: 120, Sup diff: 0.00000642
+%  Iteration: 121, Sup diff: 0.00000616
+%  Iteration: 122, Sup diff: 0.00000591
+%  Iteration: 123, Sup diff: 0.00000567
+%  Iteration: 124, Sup diff: 0.00000544
+%  Iteration: 125, Sup diff: 0.00000522
+%  Iteration: 126, Sup diff: 0.00000501
+%  Iteration: 127, Sup diff: 0.00000481
+%  Iteration: 128, Sup diff: 0.00000461
+%  Iteration: 129, Sup diff: 0.00000443
+%  Iteration: 130, Sup diff: 0.00000425
+%  Iteration: 131, Sup diff: 0.00000408
+%  Iteration: 132, Sup diff: 0.00000391
+%  Iteration: 133, Sup diff: 0.00000375
+%  Iteration: 134, Sup diff: 0.00000360
+%  Iteration: 135, Sup diff: 0.00000346
+%  Iteration: 136, Sup diff: 0.00000332
+%  Iteration: 137, Sup diff: 0.00000318
+%  Iteration: 138, Sup diff: 0.00000305
+%  Iteration: 139, Sup diff: 0.00000293
+%  Iteration: 140, Sup diff: 0.00000281
+%  Iteration: 141, Sup diff: 0.00000270
+%  Iteration: 142, Sup diff: 0.00000259
+%  Iteration: 143, Sup diff: 0.00000248
+%  Iteration: 144, Sup diff: 0.00000238
+%  Iteration: 145, Sup diff: 0.00000229
+%  Iteration: 146, Sup diff: 0.00000220
+%  Iteration: 147, Sup diff: 0.00000211
+%  Iteration: 148, Sup diff: 0.00000202
+%  Iteration: 149, Sup diff: 0.00000194
+%  Iteration: 150, Sup diff: 0.00000186
+%  Iteration: 151, Sup diff: 0.00000179
+%  Iteration: 152, Sup diff: 0.00000171
+%  Iteration: 153, Sup diff: 0.00000164
+%  Iteration: 154, Sup diff: 0.00000158
+%  Iteration: 155, Sup diff: 0.00000151
+%  Iteration: 156, Sup diff: 0.00000145
+%  Iteration: 157, Sup diff: 0.00000139
+%  Iteration: 158, Sup diff: 0.00000134
+%  Iteration: 159, Sup diff: 0.00000128
+%  Iteration: 160, Sup diff: 0.00000123
+%  Iteration: 161, Sup diff: 0.00000118
+%  Iteration: 162, Sup diff: 0.00000114
+%  Iteration: 163, Sup diff: 0.00000109
+%  Iteration: 164, Sup diff: 0.00000105
+%  Iteration: 165, Sup diff: 0.00000100
+%  Iteration: 166, Sup diff: 0.00000096
+%  Iteration: 167, Sup diff: 0.00000092
+% Elapsed time is 10393.859303 seconds.
+%  Convergence achieved. Total Number of Iteration: 167, Sup diff: 0.00000092
 
 %% figures for Value Function Iteration with a Fixed Grid
 
