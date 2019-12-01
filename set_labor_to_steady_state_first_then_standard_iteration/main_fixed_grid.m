@@ -534,176 +534,261 @@ savefig('q3_consumptionPolicy_2_fixed_grid')
 %load PS2
 T = 40;
 
-% Find ergodic steady state when z=0,alpha=0.3
-position=policyFunction(:,8)>gridCapital'; % find first time policy function crosses the 45? line!
+% Find ergodic steady state when z=0,A=1
+% position=policyFunction(:,8)>gridCapital'; % find first time policy function crosses the 45? line!
+% index = find(position==1,1,'last');
+position = mKPolicy(:,(Na+1)/2)>vGrid_k; % find first time policy function crosses the 45? line!
 index = find(position==1,1,'last');
 
 % Initial position in ergodic steady-state
-% one time transitory shock to productivity
-impulseRespCapitalProd = zeros(1,T);
-impulseRespLaborProd   = zeros(1,T);
-impulseRespConsProd    = zeros(1,T);
+% one time transitory shock to productivity, i.e., a good shock 1, which
+% shock 2 is still remaining at 1
+impulseRespCapitalProductivity = zeros(1,T);
+impulseRespLabor1Productivity   = zeros(1,T);
+impulseRespLabor2Productivity   = zeros(1,T);
+impulseRespCons1Productivity    = zeros(1,T);
+impulseRespCons2Productivity    = zeros(1,T);
 
-impulseRespCapitalProd(1) = policyFunction(index,8);
-impulseRespLaborProd(1)   = laborFunction(index,8);
-impulseRespConsProd(1)    = consumptionFunction(index,8);
-impulseRespCapitalProd(2) = policyFunction(index,14);
-impulseRespLaborProd(2)   = laborFunction(index,14);
-impulseRespConsProd(2)    = consumptionFunction(index,14);
+impulseRespCapitalProductivity(1) = mKPolicy(index,(Na+1)/2);
+impulseRespLabor1Productivity(1)   = mLaborPolicy_1(index,(Na+1)/2);
+impulseRespLabor2Productivity(1)   = mLaborPolicy_2(index,(Na+1)/2);
+impulseRespCons1Productivity(1)    = mConsumptionPolicy_1(index,(Na+1)/2);
+impulseRespCons2Productivity(1)    = mConsumptionPolicy_2(index,(Na+1)/2);
 
-% Interpolate
-for t = 3:T
-    
-    capitalLowIR = max(sum(impulseRespCapitalProd(t-1)>gridCapital));
-    capitalHighIR = capitalLowIR+1;
-    
-    impulseRespCapitalProd(t) = interp1([gridCapital(capitalLowIR),...
-        gridCapital(capitalHighIR)],[policyFunction(capitalLowIR,8),...
-        policyFunction(capitalHighIR,8)],impulseRespCapitalProd(t-1));
-    
-    impulseRespLaborProd(t)  = interp1([gridCapital(capitalLowIR),...
-        gridCapital(capitalHighIR)],[laborFunction(capitalLowIR,8),...
-        laborFunction(capitalHighIR,8)],impulseRespCapitalProd(t-1));
-    
-    impulseRespConsProd(t)  = interp1([gridCapital(capitalLowIR),...
-        gridCapital(capitalHighIR)],[consumptionFunction(capitalLowIR,8),...
-        consumptionFunction(capitalHighIR,8)],impulseRespCapitalProd(t-1));    
-end
-
-    
-% Change to percentage deviations from ss
-impulseRespCapitalProdPD = zeros(1,T);
-impulseRespLaborProdPD   = zeros(1,T);
-impulseRespConsProdPD    = zeros(1,T);
-    
-for t = 1:T
-    impulseRespCapitalProdPD(t) = (log(impulseRespCapitalProd(t))...
-        -log(impulseRespCapitalProd(1)))*100;
-    impulseRespLaborProdPD(t) = (log(impulseRespLaborProd(t))...
-        -log(impulseRespLaborProd(1)))*100;
-    impulseRespConsProdPD(t) = (log(impulseRespConsProd(t))...
-        -log(impulseRespConsProd(1)))*100;
-end
-
-% Initial position in ergodic steady-state
-% one time transitory shock to capital share
-impulseRespCapitalShare = zeros(1,T);
-impulseRespLaborShare = zeros(1,T);
-impulseRespConsShare = zeros(1,T);
-
-impulseRespCapitalShare(1)  = policyFunction(index,8);
-impulseRespLaborShare(1)    = laborFunction(index,8);
-impulseRespConsShare(1)     = consumptionFunction(index,8);
-impulseRespCapitalShare(2)  = policyFunction(index,9);
-impulseRespLaborShare(2)    = laborFunction(index,9);
-impulseRespConsShare(2)     = consumptionFunction(index,9);
+impulseRespCapitalProductivity(2) = mKPolicy(index,Na_2*(Na_1-1)+(Na_2+1)/2);
+impulseRespLabor1Productivity(2)   = mLaborPolicy_1(index,Na_2*(Na_1-1)+(Na_2+1)/2);
+impulseRespLabor2Productivity(2)   = mLaborPolicy_2(index,Na_2*(Na_1-1)+(Na_2+1)/2);
+impulseRespCons1Productivity(2)    = mConsumptionPolicy_1(index,Na_2*(Na_1-1)+(Na_2+1)/2);
+impulseRespCons2Productivity(2)    = mConsumptionPolicy_2(index,Na_2*(Na_1-1)+(Na_2+1)/2);
 
 % Interpolate
 for t = 3:T
     
-    capitalLowIR = max(sum(impulseRespCapitalShare(t-1)>gridCapital));
+    capitalLowIR = max(sum(impulseRespCapitalProductivity(t-1)>vGrid_k));
     capitalHighIR = capitalLowIR+1;
     
-    impulseRespCapitalShare(t) = interp1([gridCapital(capitalLowIR),...
-        gridCapital(capitalHighIR)],[policyFunction(capitalLowIR,8),...
-        policyFunction(capitalHighIR,8)],impulseRespCapitalShare(t-1));
+    impulseRespCapitalProductivity(t) = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mKPolicy(capitalLowIR,(Na+1)/2),...
+        mKPolicy(capitalHighIR,(Na+1)/2)],impulseRespCapitalProductivity(t-1));
     
-    impulseRespLaborShare(t)  = interp1([gridCapital(capitalLowIR),...
-        gridCapital(capitalHighIR)],[laborFunction(capitalLowIR,8),...
-        laborFunction(capitalHighIR,8)],impulseRespCapitalShare(t-1));
+    impulseRespLabor1Productivity(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mLaborPolicy_1(capitalLowIR,(Na+1)/2),...
+        mLaborPolicy_1(capitalHighIR,(Na+1)/2)],impulseRespCapitalProductivity(t-1));
+
+    impulseRespLabor2Productivity(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mLaborPolicy_2(capitalLowIR,(Na+1)/2),...
+        mLaborPolicy_2(capitalHighIR,(Na+1)/2)],impulseRespCapitalProductivity(t-1));
     
-    impulseRespConsShare(t)  = interp1([gridCapital(capitalLowIR),...
-        gridCapital(capitalHighIR)],[consumptionFunction(capitalLowIR,8),...
-        consumptionFunction(capitalHighIR,8)],impulseRespCapitalShare(t-1));    
+    impulseRespCons1Productivity(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mConsumptionPolicy_1(capitalLowIR,(Na+1)/2),...
+        mConsumptionPolicy_1(capitalHighIR,(Na+1)/2)],impulseRespCapitalProductivity(t-1));    
+    
+    impulseRespCons2Productivity(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mConsumptionPolicy_2(capitalLowIR,(Na+1)/2),...
+        mConsumptionPolicy_2(capitalHighIR,(Na+1)/2)],impulseRespCapitalProductivity(t-1));    
+end
+
+    
+% Change to percentage deviations from steady state
+impulseRespCapitalProductivityPercentageDeviation = zeros(1,T);
+impulseRespLabor1ProductivityPercentageDeviation   = zeros(1,T);
+impulseRespLabor2ProductivityPercentageDeviation   = zeros(1,T);
+impulseRespCons1ProductivityPercentageDeviation    = zeros(1,T);
+impulseRespCons2ProductivityPercentageDeviation    = zeros(1,T);
+    
+for t = 1:T
+    impulseRespCapitalProductivityPercentageDeviation(t) = (log(impulseRespCapitalProductivity(t))...
+        -log(impulseRespCapitalProductivity(1)))*100;
+    
+    impulseRespLabor1ProductivityPercentageDeviation(t) = (log(impulseRespLabor1Productivity(t))...
+        -log(impulseRespLabor1Productivity(1)))*100;
+    impulseRespLabor2ProductivityPercentageDeviation(t) = (log(impulseRespLabor2Productivity(t))...
+        -log(impulseRespLabor2Productivity(1)))*100;
+    
+    impulseRespCons1ProductivityPercentageDeviation(t) = (log(impulseRespCons1Productivity(t))...
+        -log(impulseRespCons1Productivity(1)))*100;
+    impulseRespCons2ProductivityPercentageDeviation(t) = (log(impulseRespCons2Productivity(t))...
+        -log(impulseRespCons2Productivity(1)))*100;
+end
+
+%% Initial position in ergodic steady-state
+% one time transitory shock to Employment
+impulseRespCapitalEmployment = zeros(1,T);
+impulseRespLabor1Employment = zeros(1,T);
+impulseRespLabor2Employment = zeros(1,T);
+impulseRespCons1Employment = zeros(1,T);
+impulseRespCons2Employment = zeros(1,T);
+
+impulseRespCapitalEmployment(1)  = mKPolicy(index,(Na+1)/2);
+impulseRespLabor1Employment(1)    = mLaborPolicy_1(index,(Na+1)/2);
+impulseRespLabor2Employment(1)    = mLaborPolicy_2(index,(Na+1)/2);
+impulseRespCons1Employment(1)     = mConsumptionPolicy_1(index,(Na+1)/2);
+impulseRespCons2Employment(1)     = mConsumptionPolicy_2(index,(Na+1)/2);
+
+impulseRespCapitalEmployment(2)  = mKPolicy(index,Na_2*(Na_1+1)/2);
+impulseRespLabor1Employment(2)    = mLaborPolicy_1(index,Na_2*(Na_1+1)/2);
+impulseRespLabor2Employment(2)    = mLaborPolicy_2(index,Na_2*(Na_1+1)/2);
+impulseRespCons1Employment(2)     = mConsumptionPolicy_1(index,Na_2*(Na_1+1)/2);
+impulseRespCons2Employment(2)     = mConsumptionPolicy_2(index,Na_2*(Na_1+1)/2);
+
+% Interpolate
+for t = 3:T
+    
+    capitalLowIR = max(sum(impulseRespCapitalEmployment(t-1)>vGrid_k));
+    capitalHighIR = capitalLowIR+1;
+    
+    impulseRespCapitalEmployment(t) = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mKPolicy(capitalLowIR,(Na+1)/2),...
+        mKPolicy(capitalHighIR,(Na+1)/2)],impulseRespCapitalEmployment(t-1));
+    
+    impulseRespLabor1Employment(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mLaborPolicy_1(capitalLowIR,(Na+1)/2),...
+        mLaborPolicy_1(capitalHighIR,(Na+1)/2)],impulseRespCapitalEmployment(t-1));
+
+    impulseRespLabor2Employment(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mLaborPolicy_2(capitalLowIR,(Na+1)/2),...
+        mLaborPolicy_2(capitalHighIR,(Na+1)/2)],impulseRespCapitalEmployment(t-1));
+    
+    impulseRespCons1Employment(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mConsumptionPolicy_1(capitalLowIR,(Na+1)/2),...
+        mConsumptionPolicy_1(capitalHighIR,(Na+1)/2)],impulseRespCapitalEmployment(t-1));    
+    
+    impulseRespCons2Employment(t)  = interp1([vGrid_k(capitalLowIR),...
+        vGrid_k(capitalHighIR)],[mConsumptionPolicy_2(capitalLowIR,(Na+1)/2),...
+        mConsumptionPolicy_2(capitalHighIR,(Na+1)/2)],impulseRespCapitalEmployment(t-1));    
 end
 
 % Change to percentage deviations from ss
-impulseRespCapitalSharePD = zeros(1,T);
-impulseRespLaborSharePD   = zeros(1,T);
-impulseRespConsSharePD    = zeros(1,T);
+impulseRespCapitalEmploymentPercentageDeviation = zeros(1,T);
+impulseRespLabor1EmploymentPercentageDeviation   = zeros(1,T);
+impulseRespLabor2EmploymentPercentageDeviation   = zeros(1,T);
+impulseRespCons1EmploymentPercentageDeviation    = zeros(1,T);
+impulseRespCons2EmploymentPercentageDeviation    = zeros(1,T);
     
 for t = 1:T
-    impulseRespCapitalSharePD(t) = (log(impulseRespCapitalShare(t))...
-        -log(impulseRespCapitalShare(1)))*100;
-    impulseRespLaborSharePD(t) = (log(impulseRespLaborShare(t))...
-        -log(impulseRespLaborShare(1)))*100;
-    impulseRespConsSharePD(t) = (log(impulseRespConsShare(t))...
-        -log(impulseRespConsShare(1)))*100;
+    impulseRespCapitalEmploymentPercentageDeviation(t) = (log(impulseRespCapitalEmployment(t))...
+        -log(impulseRespCapitalEmployment(1)))*100;
+    
+    impulseRespLabor1EmploymentPercentageDeviation(t) = (log(impulseRespLabor1Employment(t))...
+        -log(impulseRespLabor1Employment(1)))*100;
+    impulseRespLabor2EmploymentPercentageDeviation(t) = (log(impulseRespLabor2Employment(t))...
+        -log(impulseRespLabor2Employment(1)))*100;
+    
+    impulseRespCons1EmploymentPercentageDeviation(t) = (log(impulseRespCons1Employment(t))...
+        -log(impulseRespCons1Employment(1)))*100;
+    impulseRespCons2EmploymentPercentageDeviation(t) = (log(impulseRespCons2Employment(t))...
+        -log(impulseRespCons2Employment(1)))*100;
 end
 
-%% Plot impulse response functions
+%% Plot impulse response functions of technology shock
 
-zPath = zeros(1,T)+0;
-zPath(2) = gridProd(5);
-alphaPath = zeros(1,T)+0.3;
-alphaPath(2) = gridAlpha(3);
+a_1Path = zeros(1,T)+vGrid_a1((Na_1+1)/2);
+a_1Path(2) = vGrid_a1(Na_1);
+a_2Path = zeros(1,T)+vGrid_a2((Na_2+1)/2);
+a_2Path(2) = vGrid_a2(Na_2);
 
 figure
-subplot(2,2,1)
-plot(impulseRespCapitalProdPD)
+subplot(3,2,1)
+plot(a_1Path)
 hold on
-plot(zeros(1,T),'k')
-title('Capital')
-%xlabel('time')
-ylabel('% deviation from ss')
-subplot(2,2,2)
-plot(impulseRespLaborProdPD)
-title('Labor')
-%xlabel('time')
-ylabel('% deviation from ss')
-hold on
-plot(zeros(1,T),'k')
-subplot(2,2,3)
-plot(impulseRespConsProdPD)
-title('Consumption')
-xlabel('time')
-ylabel('% deviation from ss')
-hold on
-plot(zeros(1,T),'k')
-subplot(2,2,4)
-plot(zPath)
-hold on
-plot(zeros(1,T)+0,'k')
+plot(zeros(1,T)+vGrid_a1((Na_1+1)/2),'k')
 title('Productivity')
 xlabel('time')
-ylabel('z (level)')
-saveas(gcf,'IRFz_PS2.png')
+ylabel('technology shock (level)')
 
-figure
-subplot(2,2,1)
-plot(impulseRespCapitalSharePD)
+subplot(3,2,2)
+plot(impulseRespCapitalProductivityPercentageDeviation)
 hold on
 plot(zeros(1,T),'k')
 title('Capital')
 %xlabel('time')
 ylabel('% deviation from ss')
-subplot(2,2,2)
-plot(impulseRespLaborSharePD)
-hold on
-plot(zeros(1,T),'k')
-title('Labor')
+
+subplot(3,2,3)
+plot(impulseRespLabor1ProductivityPercentageDeviation)
+title('Labor 1')
 %xlabel('time')
 ylabel('% deviation from ss')
-subplot(2,2,3)
-plot(impulseRespConsSharePD)
 hold on
 plot(zeros(1,T),'k')
-title('Consumption')
+
+subplot(3,2,4)
+plot(impulseRespLabor2ProductivityPercentageDeviation)
+title('Labor 2')
+%xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+
+subplot(3,2,5)
+plot(impulseRespCons1ProductivityPercentageDeviation)
+title('Consumption 1')
 xlabel('time')
 ylabel('% deviation from ss')
-subplot(2,2,4)
-plot(alphaPath)
 hold on
-plot(zeros(1,T)+0.3,'k')
-title('Capital Share')
-xlabel('time')
-ylabel('\alpha (level)')
-saveas(gcf,'IRFalpha_PS2.png')
+plot(zeros(1,T),'k')
 
-plot(log10(diff(2:end)))
-xlim([1, length(diff)])
-tit=title('Log10 Sup Difference');
-set(tit,'FontSize',14);
-ax  = gca;
-set(gca,'FontSize',14)
-saveas(gcf,'error_interp.png')
+subplot(3,2,6)
+plot(impulseRespCons2ProductivityPercentageDeviation)
+title('Consumption 2')
+xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+
+saveas(gcf,'IRF_productivity_PS2.png')
+
+
+figure
+subplot(3,2,1)
+plot(a_2Path)
+hold on
+plot(zeros(1,T)+vGrid_a2((Na_2+1)/2),'k')
+title('Productivity')
+xlabel('time')
+ylabel('technology shock (level)')
+
+subplot(3,2,2)
+plot(impulseRespCapitalEmploymentPercentageDeviation)
+hold on
+plot(zeros(1,T),'k')
+title('Capital')
+%xlabel('time')
+ylabel('% deviation from ss')
+
+subplot(3,2,3)
+plot(impulseRespLabor1EmploymentPercentageDeviation)
+title('Labor 1')
+%xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+
+subplot(3,2,4)
+plot(impulseRespLabor2EmploymentPercentageDeviation)
+title('Labor 2')
+%xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+
+subplot(3,2,5)
+plot(impulseRespCons1EmploymentPercentageDeviation)
+title('Consumption 1')
+xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+
+subplot(3,2,6)
+plot(impulseRespCons2EmploymentPercentageDeviation)
+title('Consumption 2')
+xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+
+saveas(gcf,'IRF_employment_PS2.png')
+
+
+
