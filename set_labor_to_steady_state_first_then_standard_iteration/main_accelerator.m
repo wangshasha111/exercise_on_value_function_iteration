@@ -212,22 +212,23 @@ fprintf(' Convergence achieved. Total Number of Iteration: %2.0f, Sup diff: %2.8
 
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_accelerator
 % lab computer
-%  Iteration:  1, Sup diff: 0.00516861
-%  Iteration: 11, Sup diff: 0.00067347
-%  Iteration: 21, Sup diff: 0.00018309
-%  Iteration: 31, Sup diff: 0.00011045
-%  Iteration: 41, Sup diff: 0.00010236
-%  Iteration: 51, Sup diff: 0.00006380
-%  Iteration: 61, Sup diff: 0.00001971
-%  Iteration: 71, Sup diff: 0.00001192
-%  Iteration: 81, Sup diff: 0.00000730
-%  Iteration: 91, Sup diff: 0.00000444
-%  Iteration: 101, Sup diff: 0.00000273
-%  Iteration: 111, Sup diff: 0.00000169
-%  Iteration: 121, Sup diff: 0.00000105
-%  Iteration: 123, Sup diff: 0.00000095
-% Elapsed time is 84.668544 seconds.
-%  Convergence achieved. Total Number of Iteration: 123, Sup diff: 0.00000095
+%  Iteration:  1, Sup diff: 0.00853304
+%  Iteration: 11, Sup diff: 0.00117957
+%  Iteration: 21, Sup diff: 0.00031173
+%  Iteration: 31, Sup diff: 0.00017426
+%  Iteration: 41, Sup diff: 0.00012347
+%  Iteration: 51, Sup diff: 0.00010374
+%  Iteration: 61, Sup diff: 0.00003175
+%  Iteration: 71, Sup diff: 0.00001909
+%  Iteration: 81, Sup diff: 0.00001158
+%  Iteration: 91, Sup diff: 0.00000709
+%  Iteration: 101, Sup diff: 0.00000436
+%  Iteration: 111, Sup diff: 0.00000269
+%  Iteration: 121, Sup diff: 0.00000167
+%  Iteration: 131, Sup diff: 0.00000103
+%  Iteration: 133, Sup diff: 0.00000094
+% Elapsed time is 95.075118 seconds.
+%  Convergence achieved. Total Number of Iteration: 133, Sup diff: 0.00000094
 
 
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
@@ -402,27 +403,71 @@ savefig('q3_eulerEquationErrorLinearInterpolation_accelerator')
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_thenDoRealValueFunctionIteration_accelerator
 % lab computer
 
-%  Iteration:  1, Sup diff: 0.00128356
-%  Iteration: 11, Sup diff: 0.00061426
-%  Iteration: 21, Sup diff: 0.00038861
-%  Iteration: 31, Sup diff: 0.00025225
-%  Iteration: 41, Sup diff: 0.00016538
-%  Iteration: 51, Sup diff: 0.00010888
-%  Iteration: 61, Sup diff: 0.00007183
-%  Iteration: 71, Sup diff: 0.00004744
-%  Iteration: 81, Sup diff: 0.00003137
-%  Iteration: 91, Sup diff: 0.00002075
-%  Iteration: 101, Sup diff: 0.00001374
-%  Iteration: 111, Sup diff: 0.00000910
-%  Iteration: 121, Sup diff: 0.00000603
-%  Iteration: 131, Sup diff: 0.00000400
-%  Iteration: 141, Sup diff: 0.00000265
-%  Iteration: 151, Sup diff: 0.00000176
-%  Iteration: 161, Sup diff: 0.00000117
-% Elapsed time is 2100.471542 seconds.
-%  Convergence achieved. Total Number of Iteration: 166, Sup diff: 0.00000095
+%  Iteration:  1, Sup diff: 0.00016098
+%  Iteration:  2, Sup diff: 0.00007279
+%  Iteration:  3, Sup diff: 0.00003930
+%  Iteration:  4, Sup diff: 0.00002785
+%  Iteration:  5, Sup diff: 0.00002274
+%  Iteration:  6, Sup diff: 0.00001961
+%  Iteration:  7, Sup diff: 0.00001736
+%  Iteration:  8, Sup diff: 0.00001560
+%  Iteration:  9, Sup diff: 0.00001417
+%  Iteration: 10, Sup diff: 0.00001293
+%  Iteration: 11, Sup diff: 0.00003052
+%  Iteration: 12, Sup diff: 0.00002290
+%  Iteration: 13, Sup diff: 0.00001888
+%  Iteration: 14, Sup diff: 0.00001601
+%  Iteration: 15, Sup diff: 0.00001444
+%  Iteration: 16, Sup diff: 0.00001310
+%  Iteration: 17, Sup diff: 0.00001193
+%  Iteration: 18, Sup diff: 0.00001075
+%  Iteration: 19, Sup diff: 0.00000989
+%  Iteration: 20, Sup diff: 0.00000916
+%  Iteration: 21, Sup diff: 0.00001121
+%  Iteration: 22, Sup diff: 0.00000917
+%  Iteration: 23, Sup diff: 0.00000833
+%  Iteration: 24, Sup diff: 0.00000759
+%  Iteration: 25, Sup diff: 0.00000673
+%  Iteration: 26, Sup diff: 0.00000621
+%  Iteration: 27, Sup diff: 0.00000581
+%  Iteration: 28, Sup diff: 0.00000545
+%  Iteration: 29, Sup diff: 0.00000513
+%  Iteration: 30, Sup diff: 0.00000482
+%  Iteration: 31, Sup diff: 0.00000584
+%  Iteration: 32, Sup diff: 0.00000532
+%  Iteration: 33, Sup diff: 0.00000487
+%  Iteration: 34, Sup diff: 0.00000447
+%  Iteration: 35, Sup diff: 0.00000412
+%  Iteration: 36, Sup diff: 0.00000380
+%  Iteration: 37, Sup diff: 0.00000353
+%  Iteration: 38, Sup diff: 0.00000318
+%  Iteration: 39, Sup diff: 0.00000300
+%  Iteration: 40, Sup diff: 0.00000283
+%  Iteration: 41, Sup diff: 0.00000293
+%  Iteration: 42, Sup diff: 0.00000267
+%  Iteration: 43, Sup diff: 0.00000248
+%  Iteration: 44, Sup diff: 0.00000233
+%  Iteration: 45, Sup diff: 0.00000220
+%  Iteration: 46, Sup diff: 0.00000208
+%  Iteration: 47, Sup diff: 0.00000197
+%  Iteration: 48, Sup diff: 0.00000187
+%  Iteration: 49, Sup diff: 0.00000176
+%  Iteration: 50, Sup diff: 0.00000166
+%  Iteration: 51, Sup diff: 0.00000166
+%  Iteration: 52, Sup diff: 0.00000155
+%  Iteration: 53, Sup diff: 0.00000146
+%  Iteration: 54, Sup diff: 0.00000137
+%  Iteration: 55, Sup diff: 0.00000130
+%  Iteration: 56, Sup diff: 0.00000124
+%  Iteration: 57, Sup diff: 0.00000118
+%  Iteration: 58, Sup diff: 0.00000112
+%  Iteration: 59, Sup diff: 0.00000106
+%  Iteration: 60, Sup diff: 0.00000101
+%  Iteration: 61, Sup diff: 0.00000098
+% Elapsed time is 2386.091552 seconds.
+%  Convergence achieved. Total Number of Iteration: 61, Sup diff: 0.00000098
 
-%% figures for Value Function Iteration with a Fixed Grid
+%% figures for Value Function Iteration with a Fixed Grid with accelerator
 
 figure
 mesh(kk, aa, mValue');
