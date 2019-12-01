@@ -128,7 +128,7 @@ inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
 
 save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve','elapsedTimeMinutes')
 % 历时 2333.831306s 秒。% my computer
-% 历时 2152.400222 秒。 % my computer parfor
+% 历时 2152.400222 秒。 % my computer parfor 2019-11-30 22:15:53
 
 %% Step 3. Value Function Iteration without interpolation 
 % to get a good initial guess for endogenous grid
@@ -227,6 +227,10 @@ fprintf('Convergence Achieved. Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1
 vGrid_kPrime = vGrid_k;
 NkPrime = Nk;
 mValueTildeGuess = bbeta * mValue * mProb_a1a2';
+% mValueTildeGuess = rand(Nk,Na); % Please note that if you don't have a
+% good initial guess, it won't converge. This is not the case of VFI where
+% however bad the initial guess it, it's always gonna converge. In the case
+% of endogenous grid, it won't unless you have a good initial guess.
 mValueTildeOld = mValueTildeGuess;
 
 % Preallocate
@@ -334,7 +338,7 @@ xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
 savefig('q3_value_endogenous_grid')
 
-%% regular Value Function Iteration 
+%% Step 5: Regular Value Function Iteration 
 
 %% Required matrices and vectors
 
