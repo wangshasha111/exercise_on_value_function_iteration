@@ -528,3 +528,182 @@ zlabel('Good 2 Consumption','interpreter','latex')
 xlim([min(vGrid_k),max(vGrid_k)])
 ylim([min(mGrid_a1a2(:,1)),max(mGrid_a1a2(:,1))])
 savefig('q3_consumptionPolicy_2_fixed_grid')
+
+%% Calculate impulse response
+
+%load PS2
+T = 40;
+
+% Find ergodic steady state when z=0,alpha=0.3
+position=policyFunction(:,8)>gridCapital'; % find first time policy function crosses the 45? line!
+index = find(position==1,1,'last');
+
+% Initial position in ergodic steady-state
+% one time transitory shock to productivity
+impulseRespCapitalProd = zeros(1,T);
+impulseRespLaborProd   = zeros(1,T);
+impulseRespConsProd    = zeros(1,T);
+
+impulseRespCapitalProd(1) = policyFunction(index,8);
+impulseRespLaborProd(1)   = laborFunction(index,8);
+impulseRespConsProd(1)    = consumptionFunction(index,8);
+impulseRespCapitalProd(2) = policyFunction(index,14);
+impulseRespLaborProd(2)   = laborFunction(index,14);
+impulseRespConsProd(2)    = consumptionFunction(index,14);
+
+% Interpolate
+for t = 3:T
+    
+    capitalLowIR = max(sum(impulseRespCapitalProd(t-1)>gridCapital));
+    capitalHighIR = capitalLowIR+1;
+    
+    impulseRespCapitalProd(t) = interp1([gridCapital(capitalLowIR),...
+        gridCapital(capitalHighIR)],[policyFunction(capitalLowIR,8),...
+        policyFunction(capitalHighIR,8)],impulseRespCapitalProd(t-1));
+    
+    impulseRespLaborProd(t)  = interp1([gridCapital(capitalLowIR),...
+        gridCapital(capitalHighIR)],[laborFunction(capitalLowIR,8),...
+        laborFunction(capitalHighIR,8)],impulseRespCapitalProd(t-1));
+    
+    impulseRespConsProd(t)  = interp1([gridCapital(capitalLowIR),...
+        gridCapital(capitalHighIR)],[consumptionFunction(capitalLowIR,8),...
+        consumptionFunction(capitalHighIR,8)],impulseRespCapitalProd(t-1));    
+end
+
+    
+% Change to percentage deviations from ss
+impulseRespCapitalProdPD = zeros(1,T);
+impulseRespLaborProdPD   = zeros(1,T);
+impulseRespConsProdPD    = zeros(1,T);
+    
+for t = 1:T
+    impulseRespCapitalProdPD(t) = (log(impulseRespCapitalProd(t))...
+        -log(impulseRespCapitalProd(1)))*100;
+    impulseRespLaborProdPD(t) = (log(impulseRespLaborProd(t))...
+        -log(impulseRespLaborProd(1)))*100;
+    impulseRespConsProdPD(t) = (log(impulseRespConsProd(t))...
+        -log(impulseRespConsProd(1)))*100;
+end
+
+% Initial position in ergodic steady-state
+% one time transitory shock to capital share
+impulseRespCapitalShare = zeros(1,T);
+impulseRespLaborShare = zeros(1,T);
+impulseRespConsShare = zeros(1,T);
+
+impulseRespCapitalShare(1)  = policyFunction(index,8);
+impulseRespLaborShare(1)    = laborFunction(index,8);
+impulseRespConsShare(1)     = consumptionFunction(index,8);
+impulseRespCapitalShare(2)  = policyFunction(index,9);
+impulseRespLaborShare(2)    = laborFunction(index,9);
+impulseRespConsShare(2)     = consumptionFunction(index,9);
+
+% Interpolate
+for t = 3:T
+    
+    capitalLowIR = max(sum(impulseRespCapitalShare(t-1)>gridCapital));
+    capitalHighIR = capitalLowIR+1;
+    
+    impulseRespCapitalShare(t) = interp1([gridCapital(capitalLowIR),...
+        gridCapital(capitalHighIR)],[policyFunction(capitalLowIR,8),...
+        policyFunction(capitalHighIR,8)],impulseRespCapitalShare(t-1));
+    
+    impulseRespLaborShare(t)  = interp1([gridCapital(capitalLowIR),...
+        gridCapital(capitalHighIR)],[laborFunction(capitalLowIR,8),...
+        laborFunction(capitalHighIR,8)],impulseRespCapitalShare(t-1));
+    
+    impulseRespConsShare(t)  = interp1([gridCapital(capitalLowIR),...
+        gridCapital(capitalHighIR)],[consumptionFunction(capitalLowIR,8),...
+        consumptionFunction(capitalHighIR,8)],impulseRespCapitalShare(t-1));    
+end
+
+% Change to percentage deviations from ss
+impulseRespCapitalSharePD = zeros(1,T);
+impulseRespLaborSharePD   = zeros(1,T);
+impulseRespConsSharePD    = zeros(1,T);
+    
+for t = 1:T
+    impulseRespCapitalSharePD(t) = (log(impulseRespCapitalShare(t))...
+        -log(impulseRespCapitalShare(1)))*100;
+    impulseRespLaborSharePD(t) = (log(impulseRespLaborShare(t))...
+        -log(impulseRespLaborShare(1)))*100;
+    impulseRespConsSharePD(t) = (log(impulseRespConsShare(t))...
+        -log(impulseRespConsShare(1)))*100;
+end
+
+%% Plot impulse response functions
+
+zPath = zeros(1,T)+0;
+zPath(2) = gridProd(5);
+alphaPath = zeros(1,T)+0.3;
+alphaPath(2) = gridAlpha(3);
+
+figure
+subplot(2,2,1)
+plot(impulseRespCapitalProdPD)
+hold on
+plot(zeros(1,T),'k')
+title('Capital')
+%xlabel('time')
+ylabel('% deviation from ss')
+subplot(2,2,2)
+plot(impulseRespLaborProdPD)
+title('Labor')
+%xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+subplot(2,2,3)
+plot(impulseRespConsProdPD)
+title('Consumption')
+xlabel('time')
+ylabel('% deviation from ss')
+hold on
+plot(zeros(1,T),'k')
+subplot(2,2,4)
+plot(zPath)
+hold on
+plot(zeros(1,T)+0,'k')
+title('Productivity')
+xlabel('time')
+ylabel('z (level)')
+saveas(gcf,'IRFz_PS2.png')
+
+figure
+subplot(2,2,1)
+plot(impulseRespCapitalSharePD)
+hold on
+plot(zeros(1,T),'k')
+title('Capital')
+%xlabel('time')
+ylabel('% deviation from ss')
+subplot(2,2,2)
+plot(impulseRespLaborSharePD)
+hold on
+plot(zeros(1,T),'k')
+title('Labor')
+%xlabel('time')
+ylabel('% deviation from ss')
+subplot(2,2,3)
+plot(impulseRespConsSharePD)
+hold on
+plot(zeros(1,T),'k')
+title('Consumption')
+xlabel('time')
+ylabel('% deviation from ss')
+subplot(2,2,4)
+plot(alphaPath)
+hold on
+plot(zeros(1,T)+0.3,'k')
+title('Capital Share')
+xlabel('time')
+ylabel('\alpha (level)')
+saveas(gcf,'IRFalpha_PS2.png')
+
+plot(log10(diff(2:end)))
+xlim([1, length(diff)])
+tit=title('Log10 Sup Difference');
+set(tit,'FontSize',14);
+ax  = gca;
+set(gca,'FontSize',14)
+saveas(gcf,'error_interp.png')
