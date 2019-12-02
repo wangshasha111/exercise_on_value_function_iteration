@@ -253,27 +253,29 @@ toc
 fprintf(' Convergence Achieved. \n Number of Grid Points: %2.0f\n Iteration: %2.0f, Sup difference: %2.8f\n ', kGridLength(i),iteration-1, mDifference(iteration)); 
 
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_multigridANDaccelerator_method2_generalized
-%  Iteration:  1, Sup diff: 0.00530891
-%  Iteration: 11, Sup diff: 0.00073227
-%  Iteration: 21, Sup diff: 0.00019339
-%  Iteration: 31, Sup diff: 0.00010574
-%  Iteration: 41, Sup diff: 0.00011728
-%  Iteration: 51, Sup diff: 0.00003955
-%  Iteration: 61, Sup diff: 0.00002003
-%  Iteration: 71, Sup diff: 0.00001179
-%  Iteration: 81, Sup diff: 0.00000718
-%  Iteration: 91, Sup diff: 0.00000440
-%  Iteration: 101, Sup diff: 0.00000271
-%  Iteration: 111, Sup diff: 0.00000167
-%  Iteration: 121, Sup diff: 0.00000104
-%  Iteration: 123, Sup diff: 0.00000094
+%  Lab Computer
+%  Iteration:  1, Sup diff: 0.00862455
+%  Iteration: 11, Sup diff: 0.00122077
+%  Iteration: 21, Sup diff: 0.00032535
+%  Iteration: 31, Sup diff: 0.00016376
+%  Iteration: 41, Sup diff: 0.00014885
+%  Iteration: 51, Sup diff: 0.00008655
+%  Iteration: 61, Sup diff: 0.00003109
+%  Iteration: 71, Sup diff: 0.00001889
+%  Iteration: 81, Sup diff: 0.00001151
+%  Iteration: 91, Sup diff: 0.00000704
+%  Iteration: 101, Sup diff: 0.00000432
+%  Iteration: 111, Sup diff: 0.00000266
+%  Iteration: 121, Sup diff: 0.00000164
+%  Iteration: 131, Sup diff: 0.00000102
+%  Iteration: 133, Sup diff: 0.00000093
 %  Convergence Achieved. 
 %  Number of Grid Points: 100
-%  Iteration: 123, Sup difference: 0.00000094
-%  Elapsed time is 34.223833 seconds.
+%  Iteration: 133, Sup difference: 0.00000093
+%  Elapsed time is 37.078944 seconds.
 %  Convergence Achieved. 
 %  Number of Grid Points: 100
-%  Iteration: 123, Sup difference: 0.00000094
+%  Iteration: 133, Sup difference: 0.00000093
 
 %% Real Iteration
 
