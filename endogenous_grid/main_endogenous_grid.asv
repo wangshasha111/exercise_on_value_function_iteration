@@ -51,10 +51,10 @@ T = table(kSteadyState,labor_1_SteadyState,labor_2_SteadyState,consumption_1_Ste
 
 %% Step 2: set up k grid around the steady state
 
-kSpread = 0.1;
+kSpread = 0.3;
 kMax = kSteadyState * (1 + kSpread);
 kMin = kSteadyState * (1 - kSpread);
-Nk = 50;
+Nk = 250;
 vGrid_k = linspace(kMin,kMax,Nk)';
 inputs.vGrid_k = vGrid_k;
 
@@ -114,14 +114,12 @@ for ia = 1:Na
 end
 toc
 elapsedTimeMinutes=toc/60;
-save('efficiencyMatricesNk50','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve','elapsedTimeMinutes')
+save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve','elapsedTimeMinutes')
 % 历时 2333.831306s 秒。% my computer
 % 历时 2152.400222 秒。 % my computer parfor 2019-11-30 22:15:53
 
 % Lab computer
 % Elapsed time is 386.061909 seconds.
-% Elapsed time is 56.768395 seconds. % lab computer, Nk=50, spread=0.15
-
 inputs.mLabor_1Fsolve = mLabor_1Fsolve;
 inputs.mLabor_2Fsolve = mLabor_2Fsolve;
 inputs.mConsumption_1Fsolve = mConsumption_1Fsolve;
@@ -333,20 +331,9 @@ while iteration<=maxIter && mDifference(iteration) > tolerance
                     % So be sure to add 'spline','extrap'
 %                     mValueFunctionNew(:,ia) = interp1(mEndogenousOutput(:,ia),mEndogenousValueFunction(:,ia),mGridOutput(:,ia),'spline','extrap'); 
 %                 for ik = 1:Nk
-%                     mValueFunctionNew(:,ia) = interp1(mEndogenousOutput(:,ia),mEndogenousValueFunction(:,ia),mGridOutput(:,ia),'spline','extrap'); 
+                    mValueFunctionNew(:,ia) = max(interp1(mEndogenousOutput(:,ia),mEndogenousValueFunction(:,ia),mGridOutput(:,ia),'spline','extrap'),); 
 
-    %                 end       
-                    for iOutput = 1:Nk
-                        outputLow = max(sum(mGridOutput(iOutput,ia)>mEndogenousOutput(:,ia)),1);
-                        if outputLow == Nk
-                            outputLow = Nk-1;
-                        end
-                        outputHigh = outputLow + 1;
-                        mValueFunctionNew(iOutput,ia) = mEndogenousValueFunction(outputLow,ia)...
-                            +(mGridOutput(iOutput,ia)-mEndogenousOutput(outputLow,ia))...
-                            *(mEndogenousValueFunction(outputHigh,ia)-mEndogenousValueFunction(outputLow,ia))...
-                            /(mEndogenousOutput(outputHigh,ia)-mEndogenousOutput(outputLow,ia));
-                    end  
+    %                 end           
 %                 end
             end
             

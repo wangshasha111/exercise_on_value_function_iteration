@@ -22,7 +22,7 @@ function mValueTildeDerivative = getDerivative(mValueTilde,NkPrime,Na,vGrid_kPri
             end
             
             if mValueTildeDerivative(ikPrime,ia) ==0
-                mValueTildeDerivative(ikPrime,ia) =0.0000000001;
+                mValueTildeDerivative(ikPrime,ia) =NaN;
             end
             
         end
