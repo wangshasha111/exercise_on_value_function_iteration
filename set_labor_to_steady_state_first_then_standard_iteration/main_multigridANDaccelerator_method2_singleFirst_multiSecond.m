@@ -506,6 +506,86 @@ save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborT
 %  Number of Grid Points: 5000
 %  Iteration:  5, Sup difference: 0.00000063
 
+% lab computer 12/1/2019
+%  Iteration:  1, Sup diff: 0.00016100
+%  Iteration:  2, Sup diff: 0.00007283
+%  Iteration:  3, Sup diff: 0.00003961
+%  Iteration:  4, Sup diff: 0.00002800
+%  Iteration:  5, Sup diff: 0.00002287
+%  Iteration:  6, Sup diff: 0.00001975
+%  Iteration:  7, Sup diff: 0.00001744
+%  Iteration:  8, Sup diff: 0.00001570
+%  Iteration:  9, Sup diff: 0.00001423
+%  Iteration: 10, Sup diff: 0.00001296
+%  Iteration: 11, Sup diff: 0.00003023
+%  Iteration: 12, Sup diff: 0.00002255
+%  Iteration: 13, Sup diff: 0.00001823
+%  Iteration: 14, Sup diff: 0.00001639
+%  Iteration: 15, Sup diff: 0.00001399
+%  Iteration: 16, Sup diff: 0.00001281
+%  Iteration: 17, Sup diff: 0.00001177
+%  Iteration: 18, Sup diff: 0.00001085
+%  Iteration: 19, Sup diff: 0.00001004
+%  Iteration: 20, Sup diff: 0.00000930
+%  Iteration: 21, Sup diff: 0.00001122
+%  Iteration: 22, Sup diff: 0.00000977
+%  Iteration: 23, Sup diff: 0.00000897
+%  Iteration: 24, Sup diff: 0.00000825
+%  Iteration: 25, Sup diff: 0.00000763
+%  Iteration: 26, Sup diff: 0.00000647
+%  Iteration: 27, Sup diff: 0.00000589
+%  Iteration: 28, Sup diff: 0.00000544
+%  Iteration: 29, Sup diff: 0.00000511
+%  Iteration: 30, Sup diff: 0.00000480
+%  Iteration: 31, Sup diff: 0.00000614
+%  Iteration: 32, Sup diff: 0.00000539
+%  Iteration: 33, Sup diff: 0.00000498
+%  Iteration: 34, Sup diff: 0.00000461
+%  Iteration: 35, Sup diff: 0.00000422
+%  Iteration: 36, Sup diff: 0.00000376
+%  Iteration: 37, Sup diff: 0.00000353
+%  Iteration: 38, Sup diff: 0.00000323
+%  Iteration: 39, Sup diff: 0.00000296
+%  Iteration: 40, Sup diff: 0.00000277
+%  Iteration: 41, Sup diff: 0.00000309
+%  Iteration: 42, Sup diff: 0.00000288
+%  Iteration: 43, Sup diff: 0.00000255
+%  Iteration: 44, Sup diff: 0.00000237
+%  Iteration: 45, Sup diff: 0.00000224
+%  Iteration: 46, Sup diff: 0.00000212
+%  Iteration: 47, Sup diff: 0.00000197
+%  Iteration: 48, Sup diff: 0.00000185
+%  Iteration: 49, Sup diff: 0.00000175
+%  Iteration: 50, Sup diff: 0.00000165
+%  Iteration: 51, Sup diff: 0.00000164
+%  Iteration: 52, Sup diff: 0.00000153
+%  Iteration: 53, Sup diff: 0.00000144
+%  Iteration: 54, Sup diff: 0.00000137
+%  Iteration: 55, Sup diff: 0.00000131
+%  Iteration: 56, Sup diff: 0.00000124
+%  Iteration: 57, Sup diff: 0.00000117
+%  Iteration: 58, Sup diff: 0.00000111
+%  Iteration: 59, Sup diff: 0.00000106
+%  Iteration: 60, Sup diff: 0.00000101
+%  Iteration: 61, Sup diff: 0.00000098
+%  Convergence Achieved. 
+%  Number of Grid Points: 100
+%  Iteration: 61, Sup difference: 0.00000098
+%   Iteration:  1, Sup diff: 0.00000100
+%  Iteration:  2, Sup diff: 0.00000091
+%  Iteration:  3, Sup diff: 0.00000087
+%  Convergence Achieved. 
+%  Number of Grid Points: 500
+%  Iteration:  3, Sup difference: 0.00000087
+%   Iteration:  1, Sup diff: 0.00000081
+%  Convergence Achieved. 
+%  Number of Grid Points: 5000
+%  Iteration:  1, Sup difference: 0.00000081
+%  Elapsed time is 9898.196996 seconds.
+%  Convergence Achieved. 
+%  Number of Grid Points: 5000
+%  Iteration:  1, Sup difference: 0.00000081
+
 %% figures for Value Function Iteration with a Fixed Grid
 
 figure
