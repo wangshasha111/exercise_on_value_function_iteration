@@ -13,7 +13,7 @@
 close all;
 clear;
 
-cd 'E:\Dropbox\fall 19-20\jesus\homework_1';
+% cd 'E:\Dropbox\fall 19-20\jesus\homework_1';
 
 %% Calibration
 bbeta = 0.96;
@@ -149,22 +149,26 @@ mConsumption_2Fsolve = zeros(Nk,Nk,Na);
 mCurrentUtilityFsolve = zeros(Nk,Nk,Na);
 % mMarginalUtilityTodayFsolve = zeros(Nk,Na,Nk);
 % mMarginalUtilityTomorrowFsolve = ;
-laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
+% laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
 opts1 = optimoptions('fsolve','Tolx',1e-6, 'Display','off');
 
 tic
 for ia = 1:Na
     a_1 = mGrid_a1a2(ia,1);
     a_2 = mGrid_a1a2(ia,2);
-    for ik = 1:Nk
+    
+    parfor ik = 1:Nk
         
         k = vGrid_k(ik);
+        laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
         
         for ikPrime = 1:Nk
             kPrime = vGrid_k(ikPrime);
             
             vLaborFsolve = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-
+            if isreal(vLaborFsolve)==0
+                break
+            end
             mLabor_1Fsolve(ikPrime,ik,ia) = vLaborFsolve(1);
             mLabor_2Fsolve(ikPrime,ik,ia) = vLaborFsolve(2);
             mConsumption_1Fsolve(ikPrime,ik,ia) = consumptionFunction1(a_1,k,kPrime,vLaborFsolve(1),aalphaK,aalphaL,ddelta);
@@ -175,6 +179,7 @@ for ia = 1:Na
         end
         
     end
+    fprintf('Progress calculating efficiency matrices = %d%%\n', round(ia/Na*100));
 end
 toc
 
@@ -192,7 +197,10 @@ inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
 % mCurrentUtilityFsolve=permute(mCurrentUtilityFsolve,[3,2,1]);
 
 save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve')
-% 历时 2516.447092 秒。
+% 历时 2516.447092 秒。 my computer
+
+% lab computer
+% Elapsed time is 385.719908 seconds.
 
 %% Required matrices and vectors
 
