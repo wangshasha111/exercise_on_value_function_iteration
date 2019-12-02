@@ -162,38 +162,22 @@ end
 
 toc
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState
-
-%  Iteration:  1, Sup diff: 0.005169
-%  Iteration: 11, Sup diff: 0.000334
-%  Iteration: 21, Sup diff: 0.000173
-%  Iteration: 31, Sup diff: 0.000100
-%  Iteration: 41, Sup diff: 0.000060
-%  Iteration: 51, Sup diff: 0.000037
-%  Iteration: 61, Sup diff: 0.000023
-%  Iteration: 71, Sup diff: 0.000014
-%  Iteration: 81, Sup diff: 0.000009
-%  Iteration: 91, Sup diff: 0.000006
-%  Iteration: 101, Sup diff: 0.000004
-%  Iteration: 111, Sup diff: 0.000002
-%  Iteration: 121, Sup diff: 0.000001
-%  Iteration: 129, Sup diff: 0.000001
-% 历时 829.203325 秒。
-
-% On lab computer
-%  Iteration:  1, Sup diff: 0.005169
-%  Iteration: 11, Sup diff: 0.000334
-%  Iteration: 21, Sup diff: 0.000173
-%  Iteration: 31, Sup diff: 0.000100
-%  Iteration: 41, Sup diff: 0.000060
-%  Iteration: 51, Sup diff: 0.000037
-%  Iteration: 61, Sup diff: 0.000023
-%  Iteration: 71, Sup diff: 0.000014
-%  Iteration: 81, Sup diff: 0.000009
-%  Iteration: 91, Sup diff: 0.000006
-%  Iteration: 101, Sup diff: 0.000004
-%  Iteration: 111, Sup diff: 0.000002
-%  Iteration: 121, Sup diff: 0.000001
-% Elapsed time is 472.848052 seconds.
+% My computer
+% Iteration:  1, Sup diff: 0.00853304
+%  Iteration: 11, Sup diff: 0.00053716
+%  Iteration: 21, Sup diff: 0.00027886
+%  Iteration: 31, Sup diff: 0.00016058
+%  Iteration: 41, Sup diff: 0.00009653
+%  Iteration: 51, Sup diff: 0.00005916
+%  Iteration: 61, Sup diff: 0.00003662
+%  Iteration: 71, Sup diff: 0.00002281
+%  Iteration: 81, Sup diff: 0.00001428
+%  Iteration: 91, Sup diff: 0.00000898
+%  Iteration: 101, Sup diff: 0.00000567
+%  Iteration: 111, Sup diff: 0.00000359
+%  Iteration: 121, Sup diff: 0.00000228
+%  Iteration: 131, Sup diff: 0.00000146
+% 历时 1664.846001 秒。
 
 %% Then do the regular Value Function Iteration using value function calculated above as the first guess
 
@@ -294,173 +278,67 @@ savefig('q3_eulerEquationErrorLinearInterpolation_fixed_grid')
 
 save ShashaWang_JFV_PS1_250_capital_grid_points_valueFunctionIteration_setLaborToSteadyState_thenDoRealValueFunctionIteration
 
-% lab computer
-%  Iteration:  1, Sup diff: 0.00128314
-%  Iteration:  2, Sup diff: 0.00121815
-%  Iteration:  3, Sup diff: 0.00115708
-%  Iteration:  4, Sup diff: 0.00097005
-%  Iteration:  5, Sup diff: 0.00083067
-%  Iteration:  6, Sup diff: 0.00078813
-%  Iteration:  7, Sup diff: 0.00074850
-%  Iteration:  8, Sup diff: 0.00071151
-%  Iteration:  9, Sup diff: 0.00067690
-%  Iteration: 10, Sup diff: 0.00064446
-%  Iteration: 11, Sup diff: 0.00061400
-%  Iteration: 12, Sup diff: 0.00058534
-%  Iteration: 13, Sup diff: 0.00055833
-%  Iteration: 14, Sup diff: 0.00053285
-%  Iteration: 15, Sup diff: 0.00050876
-%  Iteration: 16, Sup diff: 0.00048597
-%  Iteration: 17, Sup diff: 0.00046438
-%  Iteration: 18, Sup diff: 0.00044391
-%  Iteration: 19, Sup diff: 0.00042447
-%  Iteration: 20, Sup diff: 0.00040600
-%  Iteration: 21, Sup diff: 0.00038844
-%  Iteration: 22, Sup diff: 0.00037173
-%  Iteration: 23, Sup diff: 0.00035581
-%  Iteration: 24, Sup diff: 0.00034064
-%  Iteration: 25, Sup diff: 0.00032617
-%  Iteration: 26, Sup diff: 0.00031237
-%  Iteration: 27, Sup diff: 0.00029920
-%  Iteration: 28, Sup diff: 0.00028662
-%  Iteration: 29, Sup diff: 0.00027460
-%  Iteration: 30, Sup diff: 0.00026312
-%  Iteration: 31, Sup diff: 0.00025214
-%  Iteration: 32, Sup diff: 0.00024165
-%  Iteration: 33, Sup diff: 0.00023161
-%  Iteration: 34, Sup diff: 0.00022200
-%  Iteration: 35, Sup diff: 0.00021281
-%  Iteration: 36, Sup diff: 0.00020401
-%  Iteration: 37, Sup diff: 0.00019558
-%  Iteration: 38, Sup diff: 0.00018752
-%  Iteration: 39, Sup diff: 0.00017979
-%  Iteration: 40, Sup diff: 0.00017240
-%  Iteration: 41, Sup diff: 0.00016531
-%  Iteration: 42, Sup diff: 0.00015852
-%  Iteration: 43, Sup diff: 0.00015202
-%  Iteration: 44, Sup diff: 0.00014578
-%  Iteration: 45, Sup diff: 0.00013981
-%  Iteration: 46, Sup diff: 0.00013409
-%  Iteration: 47, Sup diff: 0.00012860
-%  Iteration: 48, Sup diff: 0.00012334
-%  Iteration: 49, Sup diff: 0.00011830
-%  Iteration: 50, Sup diff: 0.00011347
-%  Iteration: 51, Sup diff: 0.00010883
-%  Iteration: 52, Sup diff: 0.00010439
-%  Iteration: 53, Sup diff: 0.00010013
-%  Iteration: 54, Sup diff: 0.00009605
-%  Iteration: 55, Sup diff: 0.00009214
-%  Iteration: 56, Sup diff: 0.00008838
-%  Iteration: 57, Sup diff: 0.00008478
-%  Iteration: 58, Sup diff: 0.00008133
-%  Iteration: 59, Sup diff: 0.00007802
-%  Iteration: 60, Sup diff: 0.00007484
-%  Iteration: 61, Sup diff: 0.00007180
-%  Iteration: 62, Sup diff: 0.00006888
-%  Iteration: 63, Sup diff: 0.00006608
-%  Iteration: 64, Sup diff: 0.00006339
-%  Iteration: 65, Sup diff: 0.00006082
-%  Iteration: 66, Sup diff: 0.00005835
-%  Iteration: 67, Sup diff: 0.00005598
-%  Iteration: 68, Sup diff: 0.00005370
-%  Iteration: 69, Sup diff: 0.00005152
-%  Iteration: 70, Sup diff: 0.00004943
-%  Iteration: 71, Sup diff: 0.00004743
-%  Iteration: 72, Sup diff: 0.00004550
-%  Iteration: 73, Sup diff: 0.00004366
-%  Iteration: 74, Sup diff: 0.00004189
-%  Iteration: 75, Sup diff: 0.00004019
-%  Iteration: 76, Sup diff: 0.00003856
-%  Iteration: 77, Sup diff: 0.00003699
-%  Iteration: 78, Sup diff: 0.00003550
-%  Iteration: 79, Sup diff: 0.00003406
-%  Iteration: 80, Sup diff: 0.00003268
-%  Iteration: 81, Sup diff: 0.00003135
-%  Iteration: 82, Sup diff: 0.00003008
-%  Iteration: 83, Sup diff: 0.00002887
-%  Iteration: 84, Sup diff: 0.00002770
-%  Iteration: 85, Sup diff: 0.00002658
-%  Iteration: 86, Sup diff: 0.00002550
-%  Iteration: 87, Sup diff: 0.00002447
-%  Iteration: 88, Sup diff: 0.00002348
-%  Iteration: 89, Sup diff: 0.00002253
-%  Iteration: 90, Sup diff: 0.00002162
-%  Iteration: 91, Sup diff: 0.00002074
-%  Iteration: 92, Sup diff: 0.00001990
-%  Iteration: 93, Sup diff: 0.00001910
-%  Iteration: 94, Sup diff: 0.00001833
-%  Iteration: 95, Sup diff: 0.00001759
-%  Iteration: 96, Sup diff: 0.00001688
-%  Iteration: 97, Sup diff: 0.00001619
-%  Iteration: 98, Sup diff: 0.00001554
-%  Iteration: 99, Sup diff: 0.00001491
-%  Iteration: 100, Sup diff: 0.00001431
-%  Iteration: 101, Sup diff: 0.00001373
-%  Iteration: 102, Sup diff: 0.00001318
-%  Iteration: 103, Sup diff: 0.00001264
-%  Iteration: 104, Sup diff: 0.00001213
-%  Iteration: 105, Sup diff: 0.00001164
-%  Iteration: 106, Sup diff: 0.00001117
-%  Iteration: 107, Sup diff: 0.00001072
-%  Iteration: 108, Sup diff: 0.00001029
-%  Iteration: 109, Sup diff: 0.00000987
-%  Iteration: 110, Sup diff: 0.00000948
-%  Iteration: 111, Sup diff: 0.00000909
-%  Iteration: 112, Sup diff: 0.00000873
-%  Iteration: 113, Sup diff: 0.00000838
-%  Iteration: 114, Sup diff: 0.00000804
-%  Iteration: 115, Sup diff: 0.00000771
-%  Iteration: 116, Sup diff: 0.00000740
-%  Iteration: 117, Sup diff: 0.00000710
-%  Iteration: 118, Sup diff: 0.00000682
-%  Iteration: 119, Sup diff: 0.00000654
-%  Iteration: 120, Sup diff: 0.00000628
-%  Iteration: 121, Sup diff: 0.00000603
-%  Iteration: 122, Sup diff: 0.00000578
-%  Iteration: 123, Sup diff: 0.00000555
-%  Iteration: 124, Sup diff: 0.00000533
-%  Iteration: 125, Sup diff: 0.00000511
-%  Iteration: 126, Sup diff: 0.00000491
-%  Iteration: 127, Sup diff: 0.00000471
-%  Iteration: 128, Sup diff: 0.00000452
-%  Iteration: 129, Sup diff: 0.00000434
-%  Iteration: 130, Sup diff: 0.00000416
-%  Iteration: 131, Sup diff: 0.00000399
-%  Iteration: 132, Sup diff: 0.00000383
-%  Iteration: 133, Sup diff: 0.00000368
-%  Iteration: 134, Sup diff: 0.00000353
-%  Iteration: 135, Sup diff: 0.00000339
-%  Iteration: 136, Sup diff: 0.00000325
-%  Iteration: 137, Sup diff: 0.00000312
-%  Iteration: 138, Sup diff: 0.00000300
-%  Iteration: 139, Sup diff: 0.00000288
-%  Iteration: 140, Sup diff: 0.00000276
-%  Iteration: 141, Sup diff: 0.00000265
-%  Iteration: 142, Sup diff: 0.00000254
-%  Iteration: 143, Sup diff: 0.00000244
-%  Iteration: 144, Sup diff: 0.00000234
-%  Iteration: 145, Sup diff: 0.00000225
-%  Iteration: 146, Sup diff: 0.00000216
-%  Iteration: 147, Sup diff: 0.00000207
-%  Iteration: 148, Sup diff: 0.00000199
-%  Iteration: 149, Sup diff: 0.00000191
-%  Iteration: 150, Sup diff: 0.00000183
-%  Iteration: 151, Sup diff: 0.00000176
-%  Iteration: 152, Sup diff: 0.00000169
-%  Iteration: 153, Sup diff: 0.00000162
-%  Iteration: 154, Sup diff: 0.00000155
-%  Iteration: 155, Sup diff: 0.00000149
-%  Iteration: 156, Sup diff: 0.00000143
-%  Iteration: 157, Sup diff: 0.00000137
-%  Iteration: 158, Sup diff: 0.00000132
-%  Iteration: 159, Sup diff: 0.00000127
-%  Iteration: 160, Sup diff: 0.00000121
-%  Iteration: 161, Sup diff: 0.00000117
-%  Iteration: 162, Sup diff: 0.00000112
-%  Iteration: 163, Sup diff: 0.00000107
-%  Iteration: 164, Sup diff: 0.00000103
-%  Iteration: 165, Sup diff: 0.00000099
-% Elapsed time is 17841.950226 seconds.
+% my computer
+%  Iteration:  1, Sup diff: 0.00016094
+%  Iteration:  2, Sup diff: 0.00007787
+%  Iteration:  3, Sup diff: 0.00005030
+%  Iteration:  4, Sup diff: 0.00003775
+%  Iteration:  5, Sup diff: 0.00003121
+%  Iteration:  6, Sup diff: 0.00002673
+%  Iteration:  7, Sup diff: 0.00002339
+%  Iteration:  8, Sup diff: 0.00002079
+%  Iteration:  9, Sup diff: 0.00001865
+%  Iteration: 10, Sup diff: 0.00001688
+%  Iteration: 11, Sup diff: 0.00001535
+%  Iteration: 12, Sup diff: 0.00001404
+%  Iteration: 13, Sup diff: 0.00001289
+%  Iteration: 14, Sup diff: 0.00001187
+%  Iteration: 15, Sup diff: 0.00001096
+%  Iteration: 16, Sup diff: 0.00001015
+%  Iteration: 17, Sup diff: 0.00000942
+%  Iteration: 18, Sup diff: 0.00000876
+%  Iteration: 19, Sup diff: 0.00000817
+%  Iteration: 20, Sup diff: 0.00000762
+%  Iteration: 21, Sup diff: 0.00000713
+%  Iteration: 22, Sup diff: 0.00000667
+%  Iteration: 23, Sup diff: 0.00000626
+%  Iteration: 24, Sup diff: 0.00000587
+%  Iteration: 25, Sup diff: 0.00000552
+%  Iteration: 26, Sup diff: 0.00000519
+%  Iteration: 27, Sup diff: 0.00000489
+%  Iteration: 28, Sup diff: 0.00000461
+%  Iteration: 29, Sup diff: 0.00000435
+%  Iteration: 30, Sup diff: 0.00000410
+%  Iteration: 31, Sup diff: 0.00000388
+%  Iteration: 32, Sup diff: 0.00000366
+%  Iteration: 33, Sup diff: 0.00000347
+%  Iteration: 34, Sup diff: 0.00000328
+%  Iteration: 35, Sup diff: 0.00000311
+%  Iteration: 36, Sup diff: 0.00000294
+%  Iteration: 37, Sup diff: 0.00000279
+%  Iteration: 38, Sup diff: 0.00000264
+%  Iteration: 39, Sup diff: 0.00000251
+%  Iteration: 40, Sup diff: 0.00000238
+%  Iteration: 41, Sup diff: 0.00000226
+%  Iteration: 42, Sup diff: 0.00000215
+%  Iteration: 43, Sup diff: 0.00000204
+%  Iteration: 44, Sup diff: 0.00000194
+%  Iteration: 45, Sup diff: 0.00000184
+%  Iteration: 46, Sup diff: 0.00000175
+%  Iteration: 47, Sup diff: 0.00000166
+%  Iteration: 48, Sup diff: 0.00000158
+%  Iteration: 49, Sup diff: 0.00000150
+%  Iteration: 50, Sup diff: 0.00000143
+%  Iteration: 51, Sup diff: 0.00000136
+%  Iteration: 52, Sup diff: 0.00000130
+%  Iteration: 53, Sup diff: 0.00000123
+%  Iteration: 54, Sup diff: 0.00000118
+%  Iteration: 55, Sup diff: 0.00000112
+%  Iteration: 56, Sup diff: 0.00000107
+%  Iteration: 57, Sup diff: 0.00000102
+%  Iteration: 58, Sup diff: 0.00000097
+%  40135.524937s
+
 %% figures for Value Function Iteration with a Fixed Grid
 
 figure
@@ -531,7 +409,6 @@ savefig('q3_consumptionPolicy_2_fixed_grid')
 
 %% Calculate impulse response
 
-%load PS2
 T = 40;
 
 % Find ergodic steady state when z=0,A=1
@@ -744,7 +621,7 @@ subplot(3,2,1)
 plot(a_2Path)
 hold on
 plot(zeros(1,T)+vGrid_a2((Na_2+1)/2),'k')
-title('Productivity')
+title('Employment Efficiency')
 xlabel('time')
 ylabel('technology shock (level)')
 
@@ -789,6 +666,3 @@ hold on
 plot(zeros(1,T),'k')
 
 saveas(gcf,'IRF_employment_PS2.png')
-
-
-
