@@ -95,7 +95,9 @@ for ia = 1:Na
 %                 [labor, fval] = fminbnd(@(labor) ...
 %                     -laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta),...
 %                     labor_1_SteadyState,labor_2_SteadyState,options)
-                
+            if isreal(vLaborFsolve)==0
+                break
+            end
             mLabor_1Fsolve(ikPrime,ik,ia) = vLaborFsolve(1);
             mLabor_2Fsolve(ikPrime,ik,ia) = vLaborFsolve(2);
             mConsumption_1Fsolve(ikPrime,ik,ia) = consumptionFunction1(a_1,k,kPrime,vLaborFsolve(1),aalphaK,aalphaL,ddelta);
@@ -107,7 +109,7 @@ for ia = 1:Na
         
     end
     
-    fprintf('Progress calculating period utility = %d%% \n', ia/Na*100); 
+    fprintf('Progress calculating period utility = %d%% \n', round(ia/Na*100)); 
 
 end
 toc
@@ -129,6 +131,10 @@ inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
 save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve','elapsedTimeMinutes')
 % 历时 2333.831306s 秒。% my computer
 % 历时 2152.400222 秒。 % my computer parfor 2019-11-30 22:15:53
+
+% Lab computer
+% Elapsed time is 385.744013 seconds.
+
 
 %% Step 3. Value Function Iteration without interpolation 
 % to get a good initial guess for endogenous grid
@@ -221,12 +227,43 @@ toc
 elapsed_seconds_VFI_no_interpolation=toc;
 fprintf('Convergence Achieved. Iteration: %2.0f, Sup diff: %2.8f\n', iteration-1, mDifference(iteration)); 
 
+% lab computer
+%  Iteration:  1, Sup diff: 0.01058380
+%  Iteration: 11, Sup diff: 0.00216851
+%  Iteration: 21, Sup diff: 0.00138217
+%  Iteration: 31, Sup diff: 0.00090208
+%  Iteration: 41, Sup diff: 0.00059409
+%  Iteration: 51, Sup diff: 0.00039264
+%  Iteration: 61, Sup diff: 0.00025991
+%  Iteration: 71, Sup diff: 0.00017219
+%  Iteration: 81, Sup diff: 0.00011414
+%  Iteration: 91, Sup diff: 0.00007569
+%  Iteration: 101, Sup diff: 0.00005020
+%  Iteration: 111, Sup diff: 0.00003331
+%  Iteration: 121, Sup diff: 0.00002211
+%  Iteration: 131, Sup diff: 0.00001467
+%  Iteration: 141, Sup diff: 0.00000974
+%  Iteration: 151, Sup diff: 0.00000647
+%  Iteration: 161, Sup diff: 0.00000430
+%  Iteration: 171, Sup diff: 0.00000285
+%  Iteration: 181, Sup diff: 0.00000190
+%  Iteration: 191, Sup diff: 0.00000126
+% Elapsed time is 2.820748 seconds.
+% Convergence Achieved. Iteration: 197, Sup diff: 0.00000099
+
+% concavify mValue so that its derivative won't come out as 0 to cause
+% infinity problems
+for ia = 1:Na
+    startIndex=sum(mValue(:,ia)<=mValue(1,ia))+1;
+    mValueConcavified(:,ia) = interp1(vGrid_k(startIndex:end),mValue(startIndex:end,ia),vGrid_k,'spline','extrap');
+end
+
 %% Step 4. Endogenous Grid: Set labor to steady state
 
 %Setting up Vtilde at n=0
 vGrid_kPrime = vGrid_k;
 NkPrime = Nk;
-mValueTildeGuess = bbeta * mValue * mProb_a1a2';
+mValueTildeGuess = bbeta * mValueConcavified * mProb_a1a2';
 % mValueTildeGuess = rand(Nk,Na); % Please note that if you don't have a
 % good initial guess, it won't converge. This is not the case of VFI where
 % however bad the initial guess it, it's always gonna converge. In the case
@@ -308,23 +345,23 @@ while iteration<=maxIter && mDifference(iteration) > tolerance
     end
 end
 toc
-%  Iteration:  1, Sup diff: 0.00055379
-%  Iteration: 11, Sup diff: 0.00032796
-%  Iteration: 21, Sup diff: 0.00021114
-%  Iteration: 31, Sup diff: 0.00013817
-%  Iteration: 41, Sup diff: 0.00009100
-%  Iteration: 51, Sup diff: 0.00006010
-%  Iteration: 61, Sup diff: 0.00003975
-%  Iteration: 71, Sup diff: 0.00002631
-%  Iteration: 81, Sup diff: 0.00001742
-%  Iteration: 91, Sup diff: 0.00001154
-%  Iteration: 101, Sup diff: 0.00000765
-%  Iteration: 111, Sup diff: 0.00000507
-%  Iteration: 121, Sup diff: 0.00000336
-%  Iteration: 131, Sup diff: 0.00000223
-%  Iteration: 141, Sup diff: 0.00000148
-%  Iteration: 151, Sup diff: 0.00000098
-% 历时 73.815803 秒。
+% lab computer
+%  Iteration:  1, Sup diff: 0.00102936
+%  Iteration: 11, Sup diff: 0.00045875
+%  Iteration: 21, Sup diff: 0.00027951
+%  Iteration: 31, Sup diff: 0.00017358
+%  Iteration: 41, Sup diff: 0.00010891
+%  Iteration: 51, Sup diff: 0.00006878
+%  Iteration: 61, Sup diff: 0.00004365
+%  Iteration: 71, Sup diff: 0.00002782
+%  Iteration: 81, Sup diff: 0.00001780
+%  Iteration: 91, Sup diff: 0.00001143
+%  Iteration: 101, Sup diff: 0.00000736
+%  Iteration: 111, Sup diff: 0.00000475
+%  Iteration: 121, Sup diff: 0.00000308
+%  Iteration: 131, Sup diff: 0.00000200
+%  Iteration: 141, Sup diff: 0.00000130
+% Elapsed time is 45.535699 seconds.
 
 figure;
 [kk,aa]=meshgrid(vGrid_k, mGrid_a1a2(:,1));
@@ -371,45 +408,70 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
     
     if (mDifference(iteration) > tolerance)    
 
-        for ia = 1:Na
-            a_1 = mGrid_a1a2(ia,1);
-            a_2 = mGrid_a1a2(ia,2);
+        if mod(iteration,10) == 1
+        
+            parfor ia = 1:Na
+                a_1 = mGrid_a1a2(ia,1);
+                a_2 = mGrid_a1a2(ia,2);
 
-            for ik = 1:Nk
-                k = vGrid_k(ik);
+                % for parfor
+                tempValue = zeros(Nk,1);
+                tempKPolicy = zeros(Nk,1);
+                tempLaborPolicy_1 = zeros(Nk,1);
+                tempLaborPolicy_2 = zeros(Nk,1);
+                tempConsumptionPolicy_1 = zeros(Nk,1);
+                tempConsumptionPolicy_2 = zeros(Nk,1);
+
+                for ik = 1:Nk
+                    k = vGrid_k(ik);
+                    laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
                 
-                if mod(iteration,10) == 1
+%                 if mod(iteration,10) == 1
 
                     if ik == 1
                         [kPrime, vAux] = fminbnd(@(kPrime) ...
-                            -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                            -valueFunction(kPrime,ik,k,ia,a_1,a_2,vGrid_k,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
                             vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
 
                     else
                         [kPrime, vAux] = fminbnd(@(kPrime) ...
-                            -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-                            mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+                            -valueFunction(kPrime,ik,k,ia,a_1,a_2,vGrid_k,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                            tempKPolicy(ik-1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
                     end
-
-                    mKPolicy(ik,ia) = kPrime;
-                    mValue(ik,ia) = -vAux;           
-
+                    
+                    tempValue(ik) = -vAux
+                    tempKPolicy(ik)= kPrime;
+                    
                     vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-                    mLaborPolicy_1(ik,ia) = vLabor(1);
-                    mLaborPolicy_2(ik,ia) = vLabor(2);
-                    mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
-                    mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
+                    tempLaborPolicy_1(ik)= vLabor(1);
+                    tempLaborPolicy_2(ik)= vLabor(2);
+                    tempConsumptionPolicy_1(ik)= consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
+                    tempConsumptionPolicy_2(ik)= consumptionFunction2(a_2,vLabor(2));
                     laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
-                else
+
+                end %k
+                    mKPolicy(:,ia) = tempKPolicy;
+                    mValue(:,ia) = tempValue;           
+
+%                     vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+                    mLaborPolicy_1(:,ia) = tempLaborPolicy_1;
+                    mLaborPolicy_2(:,ia) = tempLaborPolicy_2;
+                    mConsumptionPolicy_1(:,ia) = tempConsumptionPolicy_1;
+                    mConsumptionPolicy_2(:,ia) = tempConsumptionPolicy_2;
+
+            end % a
+        else
+            for ia = 1:Na
+                for ik = 1:Nk
 %                     currentUtility = interp1(vGrid_k,mCurrentUtilityFsolve(:,ia,ik),mKPolicy(ik,ia));
                     currentUtility = utilityFunction(mConsumptionPolicy_1(ik,ia),mConsumptionPolicy_2(ik,ia),mLaborPolicy_1(ik,ia),mLaborPolicy_2(ik,ia),mmu_1,mmu_2);;
                     expectedValue = interp1(vGrid_k,expectedValue0(:,ia),mKPolicy(ik,ia));
                     value = (1-bbeta)*currentUtility + bbeta * expectedValue;
                     
                     mValue(ik,ia) = value;
+                end %k
+            end %a
                     
-                end
-            end
         end
         iteration = iteration + 1;
         mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
@@ -420,46 +482,57 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
 %         end
 
     else
-        for ia = 1:Na
+        parfor ia = 1:Na
             a_1 = mGrid_a1a2(ia,1);
             a_2 = mGrid_a1a2(ia,2);
 
+            % for parfor
+            tempValue = zeros(Nk,1);
+            tempKPolicy = zeros(Nk,1);
+            tempLaborPolicy_1 = zeros(Nk,1);
+            tempLaborPolicy_2 = zeros(Nk,1);
+            tempConsumptionPolicy_1 = zeros(Nk,1);
+            tempConsumptionPolicy_2 = zeros(Nk,1);
+                
             for ik = 1:Nk
                 k = vGrid_k(ik);
+                laborInitial=[labor_1_SteadyState,labor_2_SteadyState];
                 
 %                 if mod(iteration,10) == 1
 
                 if ik == 1
                     [kPrime, vAux] = fminbnd(@(kPrime) ...
-                        -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                        -valueFunction(kPrime,ik,k,ia,a_1,a_2,vGrid_k,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
                         vGrid_k(1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
 
                 else
                     [kPrime, vAux] = fminbnd(@(kPrime) ...
-                        -valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
-                        mKPolicy((ik-1),ia),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
+                        -valueFunction(kPrime,ik,k,ia,a_1,a_2,vGrid_k,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL),...
+                        tempKPolicy(ik-1),min(1.2*vGrid_k(ik),vGrid_k(end)),options);
                 end
 
-                mKPolicy(ik,ia) = kPrime;
-                mValue(ik,ia) = -vAux;           
+                tempValue(ik) = -vAux
+                tempKPolicy(ik)= kPrime;
 
                 vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
-                mLaborPolicy_1(ik,ia) = vLabor(1);
-                mLaborPolicy_2(ik,ia) = vLabor(2);
-                mConsumptionPolicy_1(ik,ia) = consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
-                mConsumptionPolicy_2(ik,ia) = consumptionFunction2(a_2,vLabor(2));
+                tempLaborPolicy_1(ik)= vLabor(1);
+                tempLaborPolicy_2(ik)= vLabor(2);
+                tempConsumptionPolicy_1(ik)= consumptionFunction1(a_1,k,kPrime,vLabor(1),aalphaK,aalphaL,ddelta);
+                tempConsumptionPolicy_2(ik)= consumptionFunction2(a_2,vLabor(2));
                 laborInitial=[vLabor(1),vLabor(2)]; % update the initial guess for labor policy to speed up the process
-%                 else
-% %                     currentUtility = interp1(vGrid_k,mCurrentUtilityFsolve(:,ia,ik),mKPolicy(ik,ia));
-%                     currentUtility = utilityFunction(mConsumptionPolicy_1(ik,ia),mConsumptionPolicy_2(ik,ia),mLaborPolicy_1(ik,ia),mLaborPolicy_2(ik,ia),mmu_1,mmu_2);;
-%                     expectedValue = interp1(vGrid_k,expectedValue0(:,ia),mKPolicy(ik,ia));
-%                     value = (1-bbeta)*currentUtility + bbeta * expectedValue;
-%                     
-%                     mValue(ik,ia) = value;
-%                     
-%                 end
-            end
-        end
+
+            end %k
+            mKPolicy(:,ia) = tempKPolicy;
+            mValue(:,ia) = tempValue;           
+
+%                     vLabor = fsolve(@(labor) laborFunction(labor,a_1,a_2,k,kPrime,mmu_1,mmu_2,aalphaK,aalphaL,ddelta), laborInitial,opts1);
+            mLaborPolicy_1(:,ia) = tempLaborPolicy_1;
+            mLaborPolicy_2(:,ia) = tempLaborPolicy_2;
+            mConsumptionPolicy_1(:,ia) = tempConsumptionPolicy_1;
+            mConsumptionPolicy_2(:,ia) = tempConsumptionPolicy_2;
+
+        end % a
+            
         iteration = iteration + 1;
         mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
         mValue0         = mValue;
@@ -472,12 +545,6 @@ while iteration <= maxIter  ...% make sure the last iteration does the maximizat
             break
         end
     end
-%         iteration = iteration + 1;
-%         mDifference(iteration) = max(abs(mValue - mValue0),[],'all');
-%         mValue0         = mValue;
-% 
-%         fprintf(' Iteration: %2.0f, Sup diff: %2.6f\n', iteration-1, mDifference(iteration)); 
-
 end
 
 toc
@@ -647,7 +714,29 @@ save ShashaWang_JFV_PS1_endogenous_250_capital_grid_points_valueFunctionIteratio
 % 历时 2923.220793 秒。
 %  Convergence achieved. Total Number of Iteration: 137, Sup diff: 0.00000094
 
-
+% lab computer
+%  Iteration:  1, Sup diff: 0.00173703
+%  Iteration: 11, Sup diff: 0.00114576
+%  Iteration: 21, Sup diff: 0.00076644
+%  Iteration: 31, Sup diff: 0.00051396
+%  Iteration: 41, Sup diff: 0.00033294
+%  Iteration: 51, Sup diff: 0.00022067
+%  Iteration: 61, Sup diff: 0.00014629
+%  Iteration: 71, Sup diff: 0.00009701
+%  Iteration: 81, Sup diff: 0.00006434
+%  Iteration: 91, Sup diff: 0.00004268
+%  Iteration: 101, Sup diff: 0.00002832
+%  Iteration: 111, Sup diff: 0.00001879
+%  Iteration: 121, Sup diff: 0.00001247
+%  Iteration: 131, Sup diff: 0.00000828
+%  Iteration: 141, Sup diff: 0.00000550
+%  Iteration: 151, Sup diff: 0.00000365
+%  Iteration: 161, Sup diff: 0.00000242
+%  Iteration: 171, Sup diff: 0.00000161
+%  Iteration: 181, Sup diff: 0.00000107
+% Elapsed time is 2180.622649 seconds.
+%  Convergence achieved. Total Number of Iteration: 184, Sup diff: 0.00000095
+%  
 
 %% figures for Value Function Iteration with a Fixed Grid
 

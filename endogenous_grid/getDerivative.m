@@ -21,6 +21,10 @@ function mValueTildeDerivative = getDerivative(mValueTilde,NkPrime,Na,vGrid_kPri
                        (vGrid_kPrime(ikPrime+1)-vGrid_kPrime(ikPrime)))/2;
             end
             
+            if mValueTildeDerivative(ikPrime,ia) ==0
+                mValueTildeDerivative(ikPrime,ia) =0.0000000001;
+            end
+            
         end
     end
     

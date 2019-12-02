@@ -1,11 +1,11 @@
-function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction(kPrime,ik,k,ia,a_1,a_2,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL)
+function [value,labor_1,labor_2,consumption_1,consumption_2] = valueFunction(kPrime,ik,k,ia,a_1,a_2,vGrid_k,expectedValue0,bbeta,mmu_1,mmu_2,ddelta,aalphaK,aalphaL)
 
-    global inputs;
-    vGrid_a1 = inputs.vGrid_a1;
-    vGrid_a2 = inputs.vGrid_a2;
-    mProb_a1 = inputs.mProb_a1;
-    mProb_a2 = inputs.mProb_a2;
-    vGrid_k = inputs.vGrid_k;
+%     global inputs;
+%     vGrid_a1 = inputs.vGrid_a1;
+%     vGrid_a2 = inputs.vGrid_a2;
+%     mProb_a1 = inputs.mProb_a1;
+%     mProb_a2 = inputs.mProb_a2;
+%     vGrid_k = inputs.vGrid_k;
     % laborFunction = inputs.laborFunction;
 
     laborInitial=[0.2,0.2];
