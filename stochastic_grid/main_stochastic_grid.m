@@ -196,7 +196,7 @@ ikStochasticGrid = randperm(Nk-2,NkDraws)+1;%a ROW vector containing numberOfDra
 ikStochasticGrid = sort(ikStochasticGrid);
 ikStochasticGrid = [1,ikStochasticGrid,Nk];
 
-NaDraws = floor(Na/2);
+NaDraws = floor(Na/1);
 seedADraws=rng;
 rng(seedADraws);
 iaStochasticGrid = randperm(Na,NaDraws);%a ROW vector containing numberOfDraws unique integers selected randomly from 1 to Nk inclusive.
