@@ -47,14 +47,14 @@ consumption_1_SteadyState = consumptionFunction1(1,kSteadyState,kSteadyState,lab
 consumption_2_SteadyState = consumptionFunction2(1,labor_2_SteadyState);
 utilitySteadyState = utilityFunction(consumption_1_SteadyState,consumption_2_SteadyState,labor_1_SteadyState,labor_2_SteadyState,mmu_1,mmu_2);
 
-T = table(kSteadyState,labor_1_SteadyState,labor_2_SteadyState,consumption_1_SteadyState,consumption_2_SteadyState)
+T = table(kSteadyState,labor_1_SteadyState,labor_2_SteadyState,consumption_1_SteadyState,consumption_2_SteadyState,utilitySteadyState)
 
 %% Step 2: set up k grid around the steady state
 
-kSpread = 0.1;
+kSpread = 0.3;
 kMax = kSteadyState * (1 + kSpread);
 kMin = kSteadyState * (1 - kSpread);
-Nk = 50;
+Nk = 250;
 vGrid_k = linspace(kMin,kMax,Nk)';
 inputs.vGrid_k = vGrid_k;
 
@@ -114,7 +114,7 @@ for ia = 1:Na
 end
 toc
 elapsedTimeMinutes=toc/60;
-save('efficiencyMatricesNk50','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve','elapsedTimeMinutes')
+save('efficiencyMatricesNk250','mLabor_1Fsolve','mLabor_2Fsolve','mConsumption_1Fsolve','mConsumption_2Fsolve','mCurrentUtilityFsolve','elapsedTimeMinutes')
 % 历时 2333.831306s 秒。% my computer
 % 历时 2152.400222 秒。 % my computer parfor 2019-11-30 22:15:53
 
@@ -134,6 +134,7 @@ inputs.mCurrentUtilityFsolve = mCurrentUtilityFsolve;
 % mConsumption_1Fsolve=permute(mConsumption_1Fsolve,[3,2,1]);
 % mConsumption_2Fsolve=permute(mConsumption_2Fsolve,[3,2,1]);
 % mCurrentUtilityFsolve=permute(mCurrentUtilityFsolve,[3,2,1]);
+
 
 
 
@@ -301,7 +302,8 @@ while iteration<=maxIter && mDifference(iteration) > tolerance
     mValueTildeDerivative = getDerivative(mValueTildeOld,NkPrime,Na,vGrid_kPrime); % NkPrime by Na
 
     % % Given mValue(ikPrime,:), by the first order condition, use the derivative of V(kPrime,a) for all a's (denoted by V(kPrime,:)) to get consumptions while keeping labor at steady state level.
-    mConsumption_2 = mGrid_a1a2(:,2)' * labor_2_SteadyState;% NkPrime by Na
+%     mConsumption_2 = mGrid_a1a2(:,2)' * labor_2_SteadyState;% NkPrime by Na
+    mConsumption_2 = mGrid_a1a2(:,2)'.* 0.5.*(mLaborPolicy_2(ceil(Nk/2),:)+mLaborPolicy_2(floor(Nk/2),:));% NkPrime by Na
     vDenominator = mmu_1*(mConsumption_2).^mmu_2 * (1-bbeta);
     mConsumption_1 = (mValueTildeDerivative./vDenominator).^(1/(mmu_1-1));% NkPrime by Na
     
@@ -312,7 +314,7 @@ while iteration<=maxIter && mDifference(iteration) > tolerance
 
     % % Given consumption, we know current utility u(kPrime,:). Recall we know already mValue(ikPrime,:) by guessing.
     % mUtility = mConsumption.^mmu_1 .* (mGrid_a1a2(:,2)' * labor_2_SteadyState).^mmu_2 - (labor_1_SteadyState+labor_2_SteadyState)^2/2
-    mCurrentUtility = utilityFunction(mConsumption_1,mConsumption_2,labor_1_SteadyState,labor_2_SteadyState,mmu_1,mmu_2); % NkPrime by Na
+    mCurrentUtility = utilityFunction(mConsumption_1,mConsumption_2,0.5*(mLaborPolicy_1(ceil(Nk/2),:)+mLaborPolicy_1(floor(Nk/2),:)),0.5*(mLaborPolicy_2(ceil(Nk/2),:)+mLaborPolicy_2(floor(Nk/2),:)),mmu_1,mmu_2); % NkPrime by Na
 
     % % Sum up V(kPrime,:) and current utility u(kPrime,:), we get V(output,a) for all a's; remember output = consumption + kPrime
     mEndogenousValueFunction = (1-bbeta) * mCurrentUtility + mValueTildeOld; % NkPrime by Na
@@ -331,24 +333,30 @@ while iteration<=maxIter && mDifference(iteration) > tolerance
                     % Note that mere interp1 will cause error since it will interpolate outside of the range and return NaN. 
                     % But if you add 'linear','extrap', you will be able to exterpolate, but the value function will not converge.
                     % So be sure to add 'spline','extrap'
-%                     mValueFunctionNew(:,ia) = interp1(mEndogenousOutput(:,ia),mEndogenousValueFunction(:,ia),mGridOutput(:,ia),'spline','extrap'); 
+                mValueFunctionNew(:,ia) = interp1(mEndogenousOutput(:,ia),mEndogenousValueFunction(:,ia),mGridOutput(:,ia),'spline','extrap'); 
 %                 for ik = 1:Nk
 %                     mValueFunctionNew(:,ia) = interp1(mEndogenousOutput(:,ia),mEndogenousValueFunction(:,ia),mGridOutput(:,ia),'spline','extrap'); 
 
     %                 end       
-                    for iOutput = 1:Nk
-                        outputLow = max(sum(mGridOutput(iOutput,ia)>mEndogenousOutput(:,ia)),1);
-                        if outputLow == Nk
-                            outputLow = Nk-1;
-                        end
-                        outputHigh = outputLow + 1;
-                        mValueFunctionNew(iOutput,ia) = mEndogenousValueFunction(outputLow,ia)...
-                            +(mGridOutput(iOutput,ia)-mEndogenousOutput(outputLow,ia))...
-                            *(mEndogenousValueFunction(outputHigh,ia)-mEndogenousValueFunction(outputLow,ia))...
-                            /(mEndogenousOutput(outputHigh,ia)-mEndogenousOutput(outputLow,ia));
-                    end  
-%                 end
-            end
+    
+    
+    
+%                     for iOutput = 1:Nk
+%                         outputLow = max(sum(mGridOutput(iOutput,ia)>mEndogenousOutput(:,ia)),1);
+%                         if outputLow == Nk
+%                             outputLow = Nk-1;
+%                         end
+%                         outputHigh = outputLow + 1;
+%                         mValueFunctionNew(iOutput,ia) = mEndogenousValueFunction(outputLow,ia)...
+%                             +(mGridOutput(iOutput,ia)-mEndogenousOutput(outputLow,ia))...
+%                             *(mEndogenousValueFunction(outputHigh,ia)-mEndogenousValueFunction(outputLow,ia))...
+%                             /(mEndogenousOutput(outputHigh,ia)-mEndogenousOutput(outputLow,ia));
+%                     end  
+                end
+
+
+
+%             end
             
         end % end kPrime
     end % end a
