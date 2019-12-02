@@ -12,14 +12,6 @@
 
 %% Value Function Iteration with Stochastic grid
 
-% Revised based on ..\main_accelerator.m
-% Even though through experiment I found out that Stochastic grid with
-% accelerator won't converge, I keep the algorithm for future tries. 
-% To NOT use the accelerator, 
-%                 if mod(iteration,10) >=0 
-% To use the accelerator,
-%                 if mod(iteration,10) ==1 
-
 %% Algorithm explained
 % The Random Bellman Operator (RBO) is a mapping 
 % where next period states are N states randomly chosen from all states.
@@ -86,7 +78,7 @@ consumption_1_SteadyState = consumptionFunction1(1,kSteadyState,kSteadyState,lab
 consumption_2_SteadyState = consumptionFunction2(1,labor_2_SteadyState);
 utilitySteadyState = utilityFunction(consumption_1_SteadyState,consumption_2_SteadyState,labor_1_SteadyState,labor_2_SteadyState,mmu_1,mmu_2);
 
-T = table(kSteadyState,labor_1_SteadyState,labor_2_SteadyState,consumption_1_SteadyState,consumption_2_SteadyState)
+T = table(kSteadyState,labor_1_SteadyState,labor_2_SteadyState,consumption_1_SteadyState,consumption_2_SteadyState,utilitySteadyState)
 
 %% Step 2: set up k grid around the steady state
 
@@ -351,24 +343,23 @@ savefig('q3_eulerEquationErrorLinearInterpolation_stochastic_grid')
 
 save ShashaWang_JFV_PS1_500_stochastic_capital_grid_points_valueFunctionIteration
 
-% Lab computer 12/2/2019 01:56
-%  Iteration:  1, Sup diff: 0.00875014
-%  Iteration: 11, Sup diff: 0.00067335
-%  Iteration: 21, Sup diff: 0.00039615
-%  Iteration: 31, Sup diff: 0.00023352
-%  Iteration: 41, Sup diff: 0.00013843
-%  Iteration: 51, Sup diff: 0.00008258
-%  Iteration: 61, Sup diff: 0.00004958
-%  Iteration: 71, Sup diff: 0.00002996
-%  Iteration: 81, Sup diff: 0.00001822
-%  Iteration: 91, Sup diff: 0.00001115
-%  Iteration: 101, Sup diff: 0.00000686
-%  Iteration: 111, Sup diff: 0.00000425
-%  Iteration: 121, Sup diff: 0.00000265
-%  Iteration: 131, Sup diff: 0.00000169
-%  Iteration: 141, Sup diff: 0.00000112
-% Elapsed time is 1.447077 seconds.
-%  Convergence achieved. Total Number of Iteration: 144, Sup diff: 0.00000099
+% Lab computer 12/2/2019 2:56pm
+%  Iteration:  1, Sup diff: 0.00910643
+%  Iteration: 11, Sup diff: 0.00049370
+%  Iteration: 21, Sup diff: 0.00025858
+%  Iteration: 31, Sup diff: 0.00014822
+%  Iteration: 41, Sup diff: 0.00008866
+%  Iteration: 51, Sup diff: 0.00005411
+%  Iteration: 61, Sup diff: 0.00003336
+%  Iteration: 71, Sup diff: 0.00002070
+%  Iteration: 81, Sup diff: 0.00001291
+%  Iteration: 91, Sup diff: 0.00000808
+%  Iteration: 101, Sup diff: 0.00000508
+%  Iteration: 111, Sup diff: 0.00000321
+%  Iteration: 121, Sup diff: 0.00000203
+%  Iteration: 131, Sup diff: 0.00000129
+% Elapsed time is 3.087839 seconds.
+%  Convergence achieved. Total Number of Iteration: 137, Sup diff: 0.00000099
 
 %% figures for Value Function Iteration with a Fixed Grid
 
