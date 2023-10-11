@@ -1,6 +1,6 @@
-# exercise_on_value_function_iteration
+# How to speed up Value Function Iteration?
 
-This file contains the [project description](https://github.com/wangshasha111/exercise_on_value_function_iteration/blob/master/homework1.pdf), [programming](https://github.com/wangshasha111/exercise_on_value_function_iteration/tree/master/homework1_code_send), and [writeup](https://github.com/wangshasha111/exercise_on_value_function_iteration/blob/master/ShashaWang_homework1.pdf) of the assignment of computational economics on value function iteration.
+This file contains the [project description](https://github.com/wangshasha111/exercise_on_value_function_iteration/blob/master/project_description.pdf), [programming](https://github.com/wangshasha111/exercise_on_value_function_iteration/tree/master/code), and [writeup](https://github.com/wangshasha111/exercise_on_value_function_iteration/blob/master/result_writeup.pdf) of the assignment of computational economics on value function iteration.
 
 ## Goals
 The model is a household life-cycle model with home production and capital accumulation. 
